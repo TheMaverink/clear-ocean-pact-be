@@ -6,9 +6,9 @@ import entries from './entries'
 
 const router = Router()
 
-router.use('/yacht', yacht)
+// router.use('/yacht', yacht)
 router.use('/users', users)
-router.use('/entries', entries)
+// router.use('/entries', entries)
 
 export default router
 

@@ -14,18 +14,23 @@ import { Router } from 'express'
 import auth from '@middlewares/auth';
 import { userValidationRules, validate } from '@utils/validator';
 
+import {
+  registerUser
+} from '@controllers/Users'
+
 const router = Router()
 
 router.post('/register/user', userValidationRules(), validate, registerUser)
-router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
-router.post('/login/user', userValidationRules(), validate, loginUser)
-router.post('/logout', auth, logout)
-router.post('/logoutAll', auth, logoutAll)
-// router.put('/settings/edit', auth, editSettings)
-router.get('/all', auth, getAllUsers)
-router.get('/:id',auth,getUser)
-router.put('/:id',auth,editUser)
-router.delete('/:id', auth,deleteUser)
-router.post('/invite', auth, inviteUsers)
+// router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
+// router.post('/login/user', userValidationRules(), validate, loginUser)
+// router.post('/logout', auth, logout)
+// router.post('/logoutAll', auth, logoutAll)
+// router.get('/all', auth, getAllUsers)
+// router.get('/:id',auth,getUser)
+// router.put('/:id',auth,editUser)
+// router.delete('/:id', auth,deleteUser)
+// router.post('/invite', auth, inviteUsers)
+
+// router.put('/settings/edit', auth, editSettings) ?
 
 export default router

@@ -1,13 +1,14 @@
 import express from "express";
+
 import Yacht from "./Yacht";
-import User from "./User";
-import Entry from "./Entry";
+import Users from "./Users";
+import Entries from "./Entries";
 
 const router = express.Router();
 
 router.use(...Yacht);
-router.use(...User);
-router.use(...Entry);
+router.use(...Users);
+router.use(...Entries);
 
 
 export default router;

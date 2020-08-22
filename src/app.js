@@ -13,7 +13,7 @@ import cors from 'cors';
 import logger from './utils/logger';
 import errorHandler from 'errorhandler';
 const { check, validationResult } = require('express-validator');
-// import Routes from './routes';
+import Routes from './routes';
 
 dotenv.config({ path: '.env' });
 
@@ -66,7 +66,7 @@ app.use(cors(corsOptions));
 
 app.get('/', (req, res, next) => res.send('API RUNNING'));
 
-// app.use('/api', Routes);
+app.use('/api', Routes);
 
 if (nodeEnv === 'development') {
   // only use in development

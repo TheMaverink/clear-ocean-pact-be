@@ -54,7 +54,7 @@ const yachtSchema = new mongoose.Schema(
 );
 
 
-userSchema.pre('save', async function (next) {
+yachtSchema.pre('save', async function (next) {
   if (this.isModified('name') || this.isModified('flag') ) {
     const yachtUniqueName = this.name + this.flag;
     this.yachtUniqueName = yachtUniqueName;

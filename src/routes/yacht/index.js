@@ -6,5 +6,7 @@ import auth from '@middlewares/auth';
 
 const router = Router()
 
-router.post('/new' ,auth, addYacht)
-router.put('/edit', auth, editYacht)
+// router.post('/new' ,auth, addYacht)
+// router.put('/edit', auth, editYacht)
+
+export default router

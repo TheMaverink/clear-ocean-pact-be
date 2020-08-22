@@ -10,8 +10,10 @@ import auth from '@middlewares/auth';
 
 const router = Router()
 
-router.get('/all', auth, getAllEntries)
-router.get('/:id', auth, getEntry)
-router.put('/:id', auth, updateEntry)
-router.delete('/:id', auth, deleteEntry)
-router.post('/new' ,auth, addEntry)
+// router.get('/all', auth, getAllEntries)
+// router.get('/:id', auth, getEntry)
+// router.put('/:id', auth, updateEntry)
+// router.delete('/:id', auth, deleteEntry)
+// router.post('/new' ,auth, addEntry)
+
+export default router
