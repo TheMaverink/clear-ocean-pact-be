@@ -21,7 +21,7 @@ router.post('/register/admin', userValidationRules(), validate, registerUserAdmi
 router.post('/login/user', userValidationRules(), validate, loginUser)
 router.post('/logout', auth, logout)
 router.post('/logoutAll', auth, logoutAll)
-router.put('/settings/edit', auth, editSettings)
+// router.put('/settings/edit', auth, editSettings)
 router.get('/all', auth, getAllUsers)
 router.get('/:id',auth,getUser)
 router.put('/:id',auth,editUser)
