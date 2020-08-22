@@ -26,7 +26,7 @@ const entrySchema = new mongoose.Schema(
       type: [String],
     },
     settings: {
-      private: {
+      isPrivate: {
         type: Boolean,
         default:false
       },
