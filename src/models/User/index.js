@@ -67,7 +67,9 @@ userSchema.virtual('entriesCount').get(function () {
 
 userSchema.methods.generateJwtToken = async function () {
   const user = this;
+  const {name,email,password} = user
   const token = jwt.sign({ _id: user.id.toString() }, process.env.JWT_SECRET);
+  // const token = jwt.sign({name,email,password} , process.env.JWT_SECRET);
   user.tokens = user.tokens.concat({ token });
   await user.save();
   return token;
