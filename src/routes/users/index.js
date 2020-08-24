@@ -17,6 +17,7 @@ import { userValidationRules, validate } from '@utils/validator';
 import {
   registerUser,
   verifyUser,
+  getUser,
   updateUser,
   loginUser,
   getAllUsers
@@ -30,12 +31,13 @@ router.get('/verify/:token', verifyUser);
 router.patch('/:id', auth, updateUser);
 router.post('/login/user', userValidationRules(), validate, loginUser);
 router.get('/all', auth, getAllUsers)
+router.get('/:id',auth,getUser)
+
 // router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
 // router.post('/login/user', userValidationRules(), validate, loginUser)
 // router.post('/logout', auth, logout)
 // router.post('/logoutAll', auth, logoutAll)
-// router.get('/all', auth, getAllUsers)
-// router.get('/:id',auth,getUser)
+
 // router.delete('/:id', auth,deleteUser)
 // router.post('/invite', auth, inviteUsers)
 

@@ -163,3 +163,17 @@ export const getAllUsers = async (req,res,next)=>{
     console.log(error.message)
   }
 }
+
+export const getUser = async (req,res,send)=>{
+
+  
+  try {
+
+    const specificUser = await User.findById( req.params.id,'name email isAdmin role entries settings')
+    res.json(specificUser)
+    
+  } catch (error) {
+    res.status(500).send('Server Error')
+    console.log(error.message)
+  }
+}
