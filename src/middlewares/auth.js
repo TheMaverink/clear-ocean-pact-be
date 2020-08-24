@@ -20,7 +20,7 @@ const auth = async (req, res, next) => {
     }
 
     req.token = token;
-    req.vessel = vessel;
+    req.user = user;
     next();
   } catch (error) {
     console.log("NOT AUTHORIZED")

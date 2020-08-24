@@ -92,3 +92,37 @@ export const verifyUser = async (req, res, next) => {
     console.log(error);
   }
 };
+
+export const updateUser = async(req,res,next)=>{
+
+  const updates = Object.keys(req.body);
+
+  const allowedUpdates = [
+    'name',
+    'profileImage',
+    'role',
+    'entries',
+    'settings'
+  ];
+
+  const updateAllowed = updates.every((update) =>
+  allowedUpdates.includes(update)
+);
+
+if (!updateAllowed) {
+  console.log('invalid updates')
+  return res.status(400).send({ error: 'Invalid updates!' });
+}
+
+try {
+
+  
+  updates.forEach((update) => (req.user[update] = req.body[update]));
+  await req.user.save();
+  res.status(200).send(req.user);
+} catch (error) {
+  console.log('error from catch backend')
+  console.log(error)
+  res.status(400).send(error);
+}
+}
