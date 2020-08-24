@@ -71,15 +71,13 @@ export const registerUser = async (req, res, next) => {
 };
 
 export const verifyUser = async (req, res, next) => {
-
   try {
-    
     const decodedId = Object.values(
       jwt.verify(req.params.token, process.env.JWT_SECRET)
     )[0];
-   
+
     await User.findByIdAndUpdate(
-       decodedId ,
+      decodedId,
       { isEmailVerified: true },
       { new: true },
       function (error, result) {
@@ -93,8 +91,7 @@ export const verifyUser = async (req, res, next) => {
   }
 };
 
-export const updateUser = async(req,res,next)=>{
-
+export const updateUser = async (req, res, next) => {
   const updates = Object.keys(req.body);
 
   const allowedUpdates = [
@@ -102,31 +99,28 @@ export const updateUser = async(req,res,next)=>{
     'profileImage',
     'role',
     'entries',
-    'settings'
+    'settings',
   ];
 
   const updateAllowed = updates.every((update) =>
-  allowedUpdates.includes(update)
-);
+    allowedUpdates.includes(update)
+  );
 
-if (!updateAllowed) {
-  console.log('invalid updates')
-  return res.status(400).send({ error: 'Invalid updates!' });
-}
+  if (!updateAllowed) {
+    console.log('invalid updates');
+    return res.status(400).send({ error: 'Invalid updates!' });
+  }
 
-try {
-
-  
-  updates.forEach((update) => (req.user[update] = req.body[update]));
-  await req.user.save();
-  res.status(200).send(req.user);
-} catch (error) {
-  console.log('error from catch backend')
-  console.log(error)
-  res.status(400).send(error);
-}
-}
-
+  try {
+    updates.forEach((update) => (req.user[update] = req.body[update]));
+    await req.user.save();
+    res.status(200).send(req.user);
+  } catch (error) {
+    console.log('error from catch backend');
+    console.log(error);
+    res.status(400).send(error);
+  }
+};
 
 export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
@@ -144,7 +138,6 @@ export const loginUser = async (req, res, next) => {
     }
 
     const token = await user.generateJwtToken();
-    
 
     res.status(200).send({ user: user.getPublicProfile(), token });
   } catch (error) {
@@ -153,27 +146,39 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
-export const getAllUsers = async (req,res,next)=>{
+export const getAllUsers = async (req, res, next) => {
   try {
-    const allUsers = await User.find({}, 'name email isAdmin role entries settings')
-    res.json(allUsers)
-    
+    const allUsers = await User.find(
+      {},
+      'name email isAdmin role entries settings'
+    );
+    res.json(allUsers);
   } catch (error) {
-    res.status(500).send('Server Error')
-    console.log(error.message)
+    res.status(500).send('Server Error');
+    console.log(error.message);
   }
-}
+};
 
-export const getUser = async (req,res,send)=>{
-
-  
+export const getUser = async (req, res, send) => {
   try {
-
-    const specificUser = await User.findById( req.params.id,'name email isAdmin role entries settings')
-    res.json(specificUser)
-    
+    const specificUser = await User.findById(
+      req.params.id,
+      'name email isAdmin role entries settings'
+    );
+    res.json(specificUser);
   } catch (error) {
-    res.status(500).send('Server Error')
-    console.log(error.message)
+    res.status(500).send('Server Error');
+    console.log(error.message);
   }
-}
+};
+
+export const deleteUser = async (req, res, send) => {
+  try {
+    await User.findOneAndRemove({ _id: req.params.id });
+
+    res.json({ msg: 'User deleted' });
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};

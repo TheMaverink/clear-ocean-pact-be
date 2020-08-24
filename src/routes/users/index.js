@@ -20,7 +20,8 @@ import {
   getUser,
   updateUser,
   loginUser,
-  getAllUsers
+  getAllUsers,
+  deleteUser
 } from '@controllers/Users';
 
 const router = Router();
@@ -32,13 +33,14 @@ router.patch('/:id', auth, updateUser);
 router.post('/login/user', userValidationRules(), validate, loginUser);
 router.get('/all', auth, getAllUsers)
 router.get('/:id',auth,getUser)
+router.delete('/:id', auth,deleteUser)
 
 // router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
-// router.post('/login/user', userValidationRules(), validate, loginUser)
+
 // router.post('/logout', auth, logout)
 // router.post('/logoutAll', auth, logoutAll)
 
-// router.delete('/:id', auth,deleteUser)
+
 // router.post('/invite', auth, inviteUsers)
 
 // router.put('/settings/edit', auth, editSettings) ?
