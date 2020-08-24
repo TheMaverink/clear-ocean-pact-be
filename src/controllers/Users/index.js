@@ -152,3 +152,14 @@ export const loginUser = async (req, res, next) => {
     res.status(500).send('Server error');
   }
 };
+
+export const getAllUsers = async (req,res,next)=>{
+  try {
+    const allUsers = await User.find({}, 'name email isAdmin role entries settings')
+    res.json(allUsers)
+    
+  } catch (error) {
+    res.status(500).send('Server Error')
+    console.log(error.message)
+  }
+}

@@ -19,6 +19,7 @@ import {
   verifyUser,
   updateUser,
   loginUser,
+  getAllUsers
 } from '@controllers/Users';
 
 const router = Router();
@@ -28,7 +29,7 @@ router.post('/register/user', userValidationRules(), validate, registerUser); //
 router.get('/verify/:token', verifyUser);
 router.patch('/:id', auth, updateUser);
 router.post('/login/user', userValidationRules(), validate, loginUser);
-
+router.get('/all', auth, getAllUsers)
 // router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
 // router.post('/login/user', userValidationRules(), validate, loginUser)
 // router.post('/logout', auth, logout)
