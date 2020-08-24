@@ -14,13 +14,20 @@ import { Router } from 'express';
 import auth from '@middlewares/auth';
 import { userValidationRules, validate } from '@utils/validator';
 
-import { registerUser, verifyUser ,updateUser} from '@controllers/Users';
+import {
+  registerUser,
+  verifyUser,
+  updateUser,
+  loginUser,
+} from '@controllers/Users';
 
 const router = Router();
 
-router.post('/register/user', userValidationRules(), validate, registerUser);
+//add new route to add users to permitted emails
+router.post('/register/user', userValidationRules(), validate, registerUser); //just use this from admin?
 router.get('/verify/:token', verifyUser);
-router.patch('/:id', auth, updateUser); //add auth middleware
+router.patch('/:id', auth, updateUser);
+router.post('/login/user', userValidationRules(), validate, loginUser);
 
 // router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
 // router.post('/login/user', userValidationRules(), validate, loginUser)
