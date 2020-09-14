@@ -60,5 +60,8 @@
     "@consts": "./src/consts",
     "@middlewares": "./src/middlewares",
     "@routes": "./src/routes"
+  },
+  "devDependencies": {
+    "babel-plugin-module-resolver": "^4.0.0"
   }
 }
