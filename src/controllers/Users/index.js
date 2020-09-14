@@ -26,7 +26,7 @@ export const registerUser = async (req, res, next) => {
             msg: 'Sorry, there is a user already registered with this email!',
           },
         ],
-      });
+      })
     }
 
     user = new User({

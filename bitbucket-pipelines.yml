@@ -1,15 +1,54 @@
-# This is a sample build configuration for JavaScript.
-# Check our guides at https://confluence.atlassian.com/x/14UWN for more examples.
-# Only use spaces to indent your .yml configuration.
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
-image: node:10.15.3
-
+image: node:12.16.3
 pipelines:
-  default:
-    - step:
-        caches:
-          - node
-        script: # Modify the commands below to build your repository.
-          - npm install
-          - npm test
+  branches:
+    master:
+      - step:
+          name: Build and test
+          script:
+            - apt-get update # to install required zip
+            - apt-get install -y zip # required for packaging up the application
+            - npm install
+            - npm run build
+            - zip -rq application.zip dist package.json .env.example
+          artifacts:
+            - application.zip
+
+      - step:
+          name: Deploy to Production
+          deployment: production
+          script:
+            - pipe: atlassian/aws-elasticbeanstalk-deploy:0.5.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+                APPLICATION_NAME: $APPLICATION_NAME
+                ENVIRONMENT_NAME: $ENVIRONMENT_NAME
+                ZIP_FILE: application.zip
+                S3_BUCKET: $S3_BUCKET
+    # disabled because we have only one redis running on aws
+    # it was adding background jobs to the same queue
+    # development:
+    #   - step:
+    #       name: Build and test
+    #       script:
+    #         - apt-get update # to install required zip
+    #         - apt-get install -y zip # required for packaging up the application
+    #         - npm install
+    #         - npm run build
+    #         - zip -rq application.zip dist package.json .env.example
+    #       artifacts:
+    #         - application.zip
+    #   - step:
+    #       name: Deploy to Staging
+    #       deployment: staging
+    #       script:
+    #         - pipe: atlassian/aws-elasticbeanstalk-deploy:0.5.0
+    #           variables:
+    #             AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    #             AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    #             AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+    #             APPLICATION_NAME: $APPLICATION_NAME
+    #             ENVIRONMENT_NAME: $ENVIRONMENT_NAME
+    #             ZIP_FILE: application.zip
+    #             S3_BUCKET: $S3_BUCKET
