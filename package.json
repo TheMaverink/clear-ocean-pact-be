@@ -7,7 +7,7 @@
     "prebuild": "rm -rf dist",
     "build": "babel src -d dist",
     "start": "npm run start-server",
-    "start-server":"node dist/app.js",
+    "start-server": "node dist/app.js",
     "start-dev": "cross-env NODE_ENV=development nodemon --exec babel-node src/app.js",
     "debug": "cross-env NODE_ENV=development nodemon --ignore 'data' --inspect --exec babel-node app.js"
   },
