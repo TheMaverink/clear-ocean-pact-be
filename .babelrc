@@ -1,8 +1,29 @@
 {
-  "presets": ["@babel/preset-env"],
-  "env": {
-    "production": {
-      "plugins": ["transform-remove-console"]
-    }
-  }
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ]
+  ],
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "root": ["./src"],
+        "alias": {
+          "@config": "./src/config",
+          "@controllers": "./src/controllers",
+          "@models": "./src/models",
+          "@utils": "./src/utils",
+          "@consts": "./src/consts",
+          "@sockets": "./src/sockets",
+          "@middlewares": "./src/middlewares"
+        }
+      }
+    ]
+  ]
 }
