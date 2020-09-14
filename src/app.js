@@ -43,6 +43,11 @@ switch (nodeEnv) {
     mongoUri = process.env.TEST_MONGODB_URI;
     console.log(chalk.red(chalk.white.bgMagenta.bold('Test Mode')));
     break;
+
+  case 'production':
+    mongoUri = process.env.DEV_MONGODB_URI;
+    console.log(chalk.red(chalk.white.bgMagenta.bold('Production Mode')));
+    break;
 }
 
 const connectDb = () => {
