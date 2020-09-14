@@ -15,12 +15,11 @@
       {
         "root": ["./src"],
         "alias": {
-          "@config": "./src/config",
+         
           "@controllers": "./src/controllers",
           "@models": "./src/models",
           "@utils": "./src/utils",
-          "@consts": "./src/consts",
-          "@sockets": "./src/sockets",
+          "@routes": "./src/routes",
           "@middlewares": "./src/middlewares"
         }
       }
