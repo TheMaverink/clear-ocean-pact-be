@@ -1,17 +1,19 @@
 import jwt from 'jsonwebtoken';
+dotenv.config({ path: '.env' });
 
-var mailgun = require('mailgun-js')({
-  apiKey: process.env.MAILGUN_API_KEY,
-  domain: process.env.MAILGUN_DOMAIN,
-});
+
 
 import dotenv from 'dotenv';
 import express from 'express';
 import bcrypt from 'bcrypt';
 import User from '@models/User';
 import Yacht from '@models/Yacht';
+var mailgun = require('mailgun-js')({
+  apiKey: process.env.MAILGUN_API_KEY,
+  domain: process.env.MAILGUN_DOMAIN,
+});
 
-dotenv.config({ path: '.env' });
+
 
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
