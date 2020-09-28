@@ -1,9 +1,14 @@
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({
+  accessKeyId: process.env.ACCESS_KEY_ID,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY,
+  region: process.env.BUCKET_REGION,
+});
+// import S3 from 'aws-sdk/clients/s3';
 dotenv.config({ path: '.env' });
 
-
-
-import dotenv from 'dotenv';
 import express from 'express';
 import bcrypt from 'bcrypt';
 import User from '@models/User';
@@ -12,8 +17,6 @@ var mailgun = require('mailgun-js')({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: process.env.MAILGUN_DOMAIN,
 });
-
-
 
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -28,7 +31,7 @@ export const registerUser = async (req, res, next) => {
             msg: 'Sorry, there is a user already registered with this email!',
           },
         ],
-      })
+      });
     }
 
     user = new User({
@@ -95,26 +98,78 @@ export const verifyUser = async (req, res, next) => {
 
 export const updateUser = async (req, res, next) => {
   const updates = Object.keys(req.body);
+  console.log(updates);
+};
 
-  const allowedUpdates = [
-    'name',
-    'profileImage',
-    'role',
-    'entries',
-    'settings',
-  ];
+export const updateAdmin = async (req, res, next) => {
+  const updates = Object.keys(req.body).filter((item) => item !== 'token');
 
-  const updateAllowed = updates.every((update) =>
-    allowedUpdates.includes(update)
-  );
+  const bucketUrl =
+    'https://' +
+    process.env.BUCKET_NAME +
+    '.s3.' +
+    process.env.BUCKET_REGION +
+    '.amazonaws.com/';
 
-  if (!updateAllowed) {
-    console.log('invalid updates');
-    return res.status(400).send({ error: 'Invalid updates!' });
-  }
-
+    let profileImage = 'path to default image';
   try {
+    if (req.file) {
+      function uploadFile(buffer, fileName) {
+        return new Promise((resolve, reject) => {
+          s3.upload(
+            {
+              Body: buffer,
+              Key: fileName,
+              Bucket: process.env.BUCKET_NAME,
+              ContentType: 'image/jpeg',
+            },
+            (error) => {
+              if (error) {
+                reject(error);
+              } else {
+                console.info(fileName);
+                resolve(fileName);
+              }
+            }
+          );
+        });
+      }
+
+      profileImage = await uploadFile(
+        req.file.buffer,
+        Date.now().toString()
+      ).then((result) => bucketUrl + result);
+
+       req.user['profileImage'] =  profileImage
+    }
+
+    //---
+
+    const allowedUpdates = [
+      'name',
+      'position',
+      'settings',
+      'password',
+      'isEmailVerified',
+      'isAdmin',
+      //receive var is admin true?
+      'profileImage',
+    ];
+
+    const updateAllowed = updates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!updateAllowed) {
+      console.log('invalid updates');
+      return res.status(400).send({ error: 'Invalid updates!' });
+    }
+
     updates.forEach((update) => (req.user[update] = req.body[update]));
+
+    if (req.path === '/updateAdmin') {
+      req.user['isAdmin'] = true;
+    }
     await req.user.save();
     res.status(200).send(req.user);
   } catch (error) {

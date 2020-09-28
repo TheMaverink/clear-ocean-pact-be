@@ -14,11 +14,18 @@ import { Router } from 'express';
 import auth from '@middlewares/auth';
 import { userValidationRules, validate } from '@utils/validator';
 
+var multer = require('multer');
+var upload = multer({
+  limits:{fileSize: 1024 * 1024}
+});
+var type = upload.single('profileImage');
+
 import {
   registerUser,
   verifyUser,
   getUser,
   updateUser,
+  updateAdmin,
   loginUser,
   getAllUsers,
   deleteUser
@@ -30,6 +37,7 @@ const router = Router();
 router.post('/register/user', userValidationRules(), validate, registerUser); //just use this from admin?
 router.get('/verify/:token', verifyUser);
 router.patch('/:id', auth, updateUser);
+router.post('/updateAdmin', auth,type, updateAdmin);
 router.post('/login/user', userValidationRules(), validate, loginUser);
 router.get('/all', auth, getAllUsers)
 router.get('/:id',auth,getUser)
@@ -46,3 +54,5 @@ router.delete('/:id', auth,deleteUser)
 // router.put('/settings/edit', auth, editSettings) ?
 
 export default router;
+
+

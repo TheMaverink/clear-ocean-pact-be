@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    role: {
+    position: {
       type: String,
     },
     entries: [
