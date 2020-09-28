@@ -21,23 +21,25 @@ const yachtSchema = new mongoose.Schema(
     admin: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      unique: true,
+      // unique: true,
     },
     name: {
       type: String,
       trim: true,
+      required:true
     },
     flag: {
       type: String,
-      required: false,
+      required:true
     },
     officialNumber: {
       type: String,
-      required: false,
+    
     },
     yachtUniqueName:{
       type: String,
-      required: false,
+      
+      required:true
     },
     yachtImage: {
       type: String,

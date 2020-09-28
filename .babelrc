@@ -11,13 +11,17 @@
       {
         "root": ["./src"],
         "alias": {
+          "@config": "./src/config",
           "@routes": "./src/routes",
           "@controllers": "./src/controllers",
           "@models": "./src/models",
           "@utils": "./src/utils",
-          "@middlewares": "./src/middlewares"
+          "@middlewares": "./src/middlewares",
+          "@consts": "./src/consts",
         }
       }
     ]
   ]
 }
+
+

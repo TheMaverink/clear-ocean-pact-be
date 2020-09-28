@@ -15,6 +15,7 @@ import errorHandler from 'errorhandler';
 const { check, validationResult } = require('express-validator');
 import Routes from './routes';
 
+
 dotenv.config({ path: '.env' });
 
 const app = express();
@@ -23,6 +24,8 @@ const httpServer = http.Server(app);
 
 let nodeEnv = process.env.NODE_ENV;
 let mongoUri;
+
+
 
 mongoose.set('useUnifiedTopology', true);
 mongoose.set('useFindAndModify', false);
