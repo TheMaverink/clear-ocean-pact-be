@@ -3,7 +3,9 @@
 
 import { Router } from 'express'
 import auth from '@middlewares/auth';
-import {createYacht} from '@controllers/Yacht'
+import {createYacht,populateInvites} from '@controllers/Yacht'
+
+
 const router = Router()
 
 var multer = require('multer');
@@ -14,6 +16,7 @@ var type = upload.single('yachtPhoto');
 
 
 router.post('/new' ,auth,type, createYacht)
+router.get('/populate',populateInvites)
 // router.put('/edit', auth, editYacht)
 
 export default router

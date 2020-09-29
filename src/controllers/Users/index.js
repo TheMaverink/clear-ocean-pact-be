@@ -111,7 +111,7 @@ export const updateAdmin = async (req, res, next) => {
     process.env.BUCKET_REGION +
     '.amazonaws.com/';
 
-    let profileImage = 'path to default image';
+  let profileImage = 'path to default image';
   try {
     if (req.file) {
       function uploadFile(buffer, fileName) {
@@ -140,7 +140,7 @@ export const updateAdmin = async (req, res, next) => {
         Date.now().toString()
       ).then((result) => bucketUrl + result);
 
-       req.user['profileImage'] =  profileImage
+      req.user['profileImage'] = profileImage;
     }
 
     //---
@@ -216,7 +216,7 @@ export const getAllUsers = async (req, res, next) => {
   }
 };
 
-export const getUser = async (req, res, send) => {
+export const getUser = async (req, res, next) => {
   try {
     const specificUser = await User.findById(
       req.params.id,
@@ -229,11 +229,37 @@ export const getUser = async (req, res, send) => {
   }
 };
 
-export const deleteUser = async (req, res, send) => {
+export const deleteUser = async (req, res, next) => {
   try {
     await User.findOneAndRemove({ _id: req.params.id });
 
     res.json({ msg: 'User deleted' });
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};
+
+export const isUserInvited = async (req, res, next) => {
+  try {
+    const { user } = req;
+    const query = await Yacht.find({ 'invitedUsers.email': user.email });
+
+    if (!query[0]) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: 'You need an invite first!' }] });
+    }
+    return res.status(200).send(query[0].yachtUniqueName);
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};
+
+export const joinYacht = async (req, res, next) => {
+  try {
+    console.log(req.body);
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);

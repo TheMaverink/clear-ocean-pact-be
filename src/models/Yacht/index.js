@@ -1,7 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import dotenv from 'dotenv';
 
-
 dotenv.config({ path: '.env' });
 
 const yachtSchema = new mongoose.Schema(
@@ -18,6 +17,12 @@ const yachtSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
+    invitedUsers: [
+      {
+        name:String,
+        email:String
+      }
+    ],
     admin: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -26,20 +31,19 @@ const yachtSchema = new mongoose.Schema(
     name: {
       type: String,
       trim: true,
-      required:true
+      required: true,
     },
     flag: {
       type: String,
-      required:true
+      required: true,
     },
     officialNumber: {
       type: String,
-    
     },
-    yachtUniqueName:{
+    yachtUniqueName: {
       type: String,
-      
-      required:true
+
+      required: true,
     },
     yachtImage: {
       type: String,
@@ -55,9 +59,8 @@ const yachtSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
 yachtSchema.pre('save', async function (next) {
-  if (this.isModified('name') || this.isModified('flag') ) {
+  if (this.isModified('name') || this.isModified('flag')) {
     const yachtUniqueName = this.name + this.flag;
     this.yachtUniqueName = yachtUniqueName;
   }

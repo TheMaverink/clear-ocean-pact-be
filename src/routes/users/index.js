@@ -28,7 +28,10 @@ import {
   updateAdmin,
   loginUser,
   getAllUsers,
-  deleteUser
+  deleteUser,
+  joinYacht,
+  isUserInvited
+  
 } from '@controllers/Users';
 
 const router = Router();
@@ -36,12 +39,15 @@ const router = Router();
 //add new route to add users to permitted emails
 router.post('/register/user', userValidationRules(), validate, registerUser); //just use this from admin?
 router.get('/verify/:token', verifyUser);
+router.get('/isUserInvited', auth, isUserInvited);
 router.patch('/:id', auth, updateUser);
 router.post('/updateAdmin', auth,type, updateAdmin);
-router.post('/login/user', userValidationRules(), validate, loginUser);
+router.post('/login', userValidationRules(), validate, loginUser);
+router.post('/join-yacht', auth,joinYacht);
 router.get('/all', auth, getAllUsers)
 router.get('/:id',auth,getUser)
 router.delete('/:id', auth,deleteUser)
+
 
 // router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
 

@@ -94,3 +94,25 @@ export const createYacht = async (req, res, next) => {
     res.status(500).send('Server error');
   }
 };
+
+export const populateInvites = async (req, res, next) => {
+  try {
+    let doc = await Yacht.findOneAndUpdate(
+      { yachtUniqueName: 'HugoBEL' },
+      {
+        invitedUsers: [
+          { email: 'userb@gmail.com', name: 'userB' },
+          { email: 'ju@ju.com', name: 'ju' },
+        ],
+      },
+      {
+        new: true,
+      }
+    );
+
+    res.status(200).send(doc);
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};
