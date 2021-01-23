@@ -97,8 +97,82 @@ export const verifyUser = async (req, res, next) => {
 };
 
 export const updateUser = async (req, res, next) => {
-  const updates = Object.keys(req.body);
+  const updates = Object.keys(req.body).filter((item) => item !== 'token');
   console.log(updates);
+
+  const bucketUrl =
+    'https://' +
+    process.env.BUCKET_NAME +
+    '.s3.' +
+    process.env.BUCKET_REGION +
+    '.amazonaws.com/';
+
+  let profileImage = 'path to default image';
+  try {
+    if (req.file) {
+      function uploadFile(buffer, fileName) {
+        return new Promise((resolve, reject) => {
+          s3.upload(
+            {
+              Body: buffer,
+              Key: fileName,
+              Bucket: process.env.BUCKET_NAME,
+              ContentType: 'image/jpeg',
+            },
+            (error) => {
+              if (error) {
+                reject(error);
+              } else {
+                console.info(fileName);
+                resolve(fileName);
+              }
+            }
+          );
+        });
+      }
+
+      profileImage = await uploadFile(
+        req.file.buffer,
+        Date.now().toString()
+      ).then((result) => bucketUrl + result);
+
+      req.user['profileImage'] = profileImage;
+    }
+
+    //---
+
+    const allowedUpdates = [
+      'name',
+      'position',
+      'settings',
+      'password',
+      'isEmailVerified',
+      'isAdmin',
+      //receive var is admin true?
+      'profileImage',
+    ];
+
+    const updateAllowed = updates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!updateAllowed) {
+      console.log('invalid updates');
+      return res.status(400).send({ error: 'Invalid updates!' });
+    }
+
+    updates.forEach((update) => (req.user[update] = req.body[update]));
+
+    if (req.path === '/updateAdmin') {
+      req.user['isAdmin'] = true;
+    }
+    await req.user.save();
+    res.status(200).send(req.user);
+  } catch (error) {
+    console.log('error from catch backend');
+    console.log(error);
+    res.status(400).send(error);
+  }
 };
 
 export const updateAdmin = async (req, res, next) => {
@@ -242,7 +316,7 @@ export const deleteUser = async (req, res, next) => {
 
 export const isUserInvited = async (req, res, next) => {
   try {
-    const { user } = req;
+    const { user } = await req;
     const query = await Yacht.find({ 'invitedUsers.email': user.email });
 
     if (!query[0]) {
@@ -250,7 +324,7 @@ export const isUserInvited = async (req, res, next) => {
         .status(400)
         .json({ errors: [{ msg: 'You need an invite first!' }] });
     }
-    return res.status(200).send(query[0].yachtUniqueName);
+    res.status(200).json({ yachtUniqueName: query[0].yachtUniqueName });
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);

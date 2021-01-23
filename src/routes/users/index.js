@@ -19,6 +19,7 @@ var upload = multer({
   limits:{fileSize: 1024 * 1024}
 });
 var type = upload.single('profileImage');
+var userType = upload.single('profileImage')
 
 import {
   registerUser,
@@ -40,7 +41,7 @@ const router = Router();
 router.post('/register/user', userValidationRules(), validate, registerUser); //just use this from admin?
 router.get('/verify/:token', verifyUser);
 router.get('/isUserInvited', auth, isUserInvited);
-router.patch('/:id', auth, updateUser);
+router.post('/updateUsers', auth, userType,updateUser);
 router.post('/updateAdmin', auth,type, updateAdmin);
 router.post('/login', userValidationRules(), validate, loginUser);
 router.post('/join-yacht', auth,joinYacht);

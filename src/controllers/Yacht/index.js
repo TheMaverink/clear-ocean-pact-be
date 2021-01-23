@@ -102,7 +102,17 @@ export const populateInvites = async (req, res, next) => {
       {
         invitedUsers: [
           { email: 'userb@gmail.com', name: 'userB' },
-          { email: 'ju@ju.com', name: 'ju' },
+          { email: 'a@a.com', name: 'ju' },
+          { email: 'b@b.com', name: 'ju' },
+          { email: 'c@c.com', name: 'ju' },
+          { email: 'd@d.com', name: 'ju' },
+          { email: 'e@e.com', name: 'ju' },
+          { email: 'jf@jf.com', name: 'ju' },
+          { email: 'jm@jm.com', name: 'ju' },
+          { email: 'f@f.com', name: 'ju' },
+          { email: 'g@g.com', name: 'ju' },
+          { email: 'jh@jh.com', name: 'ju' },
+          { email: 'h@h.com', name: 'ju' },
         ],
       },
       {
