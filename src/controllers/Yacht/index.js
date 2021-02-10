@@ -10,8 +10,6 @@ const s3 = new AWS.S3({
   secretAccessKey: process.env.SECRET_ACCESS_KEY,
   region: process.env.BUCKET_REGION,
 });
-// import S3 from 'aws-sdk/clients/s3';
-dotenv.config({ path: '.env' });
 
 export const createYacht = async (req, res, next) => {
   const bucketUrl =
@@ -52,6 +50,7 @@ export const createYacht = async (req, res, next) => {
     }
 
     if (req.file) {
+      console.log('is gona upload yacht img');
       function uploadFile(buffer, fileName) {
         return new Promise((resolve, reject) => {
           s3.upload(
@@ -63,6 +62,7 @@ export const createYacht = async (req, res, next) => {
             },
             (error) => {
               if (error) {
+                console.log(error);
                 reject(error);
               } else {
                 console.info(fileName);
@@ -88,6 +88,13 @@ export const createYacht = async (req, res, next) => {
       admin: user._id,
     });
     await yacht.save();
+
+    const currentUser = await User.findById(req.user.id);
+
+    currentUser['yacht'] = yacht._id;
+
+    await currentUser.save();
+
     res.status(200).send({ yacht });
   } catch (error) {
     console.error(error.message);
@@ -98,21 +105,35 @@ export const createYacht = async (req, res, next) => {
 export const populateInvites = async (req, res, next) => {
   try {
     let doc = await Yacht.findOneAndUpdate(
-      { yachtUniqueName: 'HugoBEL' },
+      { yachtUniqueName: 'TestPOR' },
       {
         invitedUsers: [
-          { email: 'userb@gmail.com', name: 'userB' },
           { email: 'a@a.com', name: 'ju' },
           { email: 'b@b.com', name: 'ju' },
           { email: 'c@c.com', name: 'ju' },
           { email: 'd@d.com', name: 'ju' },
           { email: 'e@e.com', name: 'ju' },
-          { email: 'jf@jf.com', name: 'ju' },
-          { email: 'jm@jm.com', name: 'ju' },
           { email: 'f@f.com', name: 'ju' },
           { email: 'g@g.com', name: 'ju' },
-          { email: 'jh@jh.com', name: 'ju' },
           { email: 'h@h.com', name: 'ju' },
+          { email: 'i@i.com', name: 'ju' },
+          { email: 'j@j.com', name: 'ju' },
+          { email: 'k@k.com', name: 'ju' },
+          { email: 'l@l.com', name: 'ju' },
+          { email: 'm@m.com', name: 'ju' },
+          { email: 'n@n.com', name: 'ju' },
+          { email: 'o@o.com', name: 'ju' },
+          { email: 'p@p.com', name: 'ju' },
+          { email: 'q@q.com', name: 'ju' },
+          { email: 'r@r.com', name: 'ju' },
+          { email: 's@s.com', name: 'ju' },
+          { email: 't@t.com', name: 'ju' },
+          { email: 'u@u.com', name: 'ju' },
+          { email: 'v@v.com', name: 'ju' },
+          { email: 'w@w.com', name: 'ju' },
+          { email: 'x@x.com', name: 'ju' },
+          { email: 'y@y.com', name: 'ju' },
+          { email: 'z@z.com', name: 'ju' },
         ],
       },
       {
@@ -121,6 +142,17 @@ export const populateInvites = async (req, res, next) => {
     );
 
     res.status(200).send(doc);
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};
+
+export const getCurrentYacht = async (req, res, next) => {
+  try {
+    const currentUserYacht = await Yacht.findById(req.user.yacht);
+
+    res.json(currentUserYacht);
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);

@@ -19,15 +19,22 @@ const yachtSchema = new mongoose.Schema(
     ],
     invitedUsers: [
       {
-        name:String,
-        email:String
-      }
+        name: String,
+        email: String,
+      },
     ],
     admin: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       // unique: true,
     },
+    entries: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Entry',
+        // unique: true,
+      },
+    ],
     name: {
       type: String,
       trim: true,

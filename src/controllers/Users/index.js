@@ -18,6 +18,33 @@ var mailgun = require('mailgun-js')({
   domain: process.env.MAILGUN_DOMAIN,
 });
 
+export const getUser = async (req, res, next) => {
+  try {
+    const specificUser = await User.findById(
+      req.params.id,
+      'name email isAdmin position entries settings'
+    );
+
+    res.json(specificUser);
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};
+
+export const getCurrentUser = async (req, res, next) => {
+  try {
+    const currentUser = await User.findById(req.user.id).select(
+      '-tokens -password'
+    );
+
+    res.json(currentUser);
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};
+
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
 
@@ -97,8 +124,12 @@ export const verifyUser = async (req, res, next) => {
 };
 
 export const updateUser = async (req, res, next) => {
-  const updates = Object.keys(req.body).filter((item) => item !== 'token');
+  const updates = Object.keys(req.body).filter(
+    (item) => item !== 'token' && item !== 'userId'
+  );
   console.log(updates);
+
+  const userToUpdate = await User.findById(req.body.userId);
 
   const bucketUrl =
     'https://' +
@@ -161,13 +192,17 @@ export const updateUser = async (req, res, next) => {
       return res.status(400).send({ error: 'Invalid updates!' });
     }
 
-    updates.forEach((update) => (req.user[update] = req.body[update]));
+    // updates.forEach((update) => (req.user[update] = req.body[update]));
+
+    updates.forEach((update) => (userToUpdate[update] = req.body[update]));
 
     if (req.path === '/updateAdmin') {
       req.user['isAdmin'] = true;
     }
-    await req.user.save();
-    res.status(200).send(req.user);
+    // await req.user.save();
+    await userToUpdate.save();
+
+    res.status(200).send(userToUpdate);
   } catch (error) {
     console.log('error from catch backend');
     console.log(error);
@@ -270,6 +305,8 @@ export const loginUser = async (req, res, next) => {
 
     const token = await user.generateJwtToken();
 
+    console.log(token);
+
     res.status(200).send({ user: user.getPublicProfile(), token });
   } catch (error) {
     console.error(error.message);
@@ -281,22 +318,10 @@ export const getAllUsers = async (req, res, next) => {
   try {
     const allUsers = await User.find(
       {},
-      'name email isAdmin role entries settings'
+      'name email isAdmin role position entries settings'
     );
-    res.json(allUsers);
-  } catch (error) {
-    res.status(500).send('Server Error');
-    console.log(error.message);
-  }
-};
 
-export const getUser = async (req, res, next) => {
-  try {
-    const specificUser = await User.findById(
-      req.params.id,
-      'name email isAdmin role entries settings'
-    );
-    res.json(specificUser);
+    res.json(allUsers);
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);
@@ -320,6 +345,7 @@ export const isUserInvited = async (req, res, next) => {
     const query = await Yacht.find({ 'invitedUsers.email': user.email });
 
     if (!query[0]) {
+      console.log('You need an invite first!');
       return res
         .status(400)
         .json({ errors: [{ msg: 'You need an invite first!' }] });

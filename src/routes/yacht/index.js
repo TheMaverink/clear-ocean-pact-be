@@ -1,22 +1,27 @@
 //PUT yacht/edit -> settings:{private:true}
 //POST yacht/new -> flag,name, officialNumber,yachtImage, userId
 
-import { Router } from 'express'
+import { Router } from 'express';
 import auth from '@middlewares/auth';
-import {createYacht,populateInvites} from '@controllers/Yacht'
-
-
-const router = Router()
-
+import {
+  createYacht,
+  populateInvites,
+  // getYacht,
+  getCurrentYacht,
+  editYacht,
+} from '@controllers/Yacht';
 var multer = require('multer');
 var upload = multer({
-  limits:{fileSize: 1024 * 1024}
+  // limits: { fileSize: 0.5 * 1024 * 1024 },
 });
 var type = upload.single('yachtPhoto');
 
+const router = Router();
 
-router.post('/new' ,auth,type, createYacht)
-router.get('/populate',populateInvites)
+router.get('/current', auth, getCurrentYacht);
+// router.get('/edit/:token', auth, editYacht);
+router.post('/new', auth, type, createYacht);
+router.get('/populate', populateInvites);
 // router.put('/edit', auth, editYacht)
 
-export default router
+export default router;

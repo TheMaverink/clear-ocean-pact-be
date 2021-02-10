@@ -26,9 +26,13 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    isAdmin:{
+    isAdmin: {
       type: Boolean,
       default: false,
+    },
+    yacht: {
+      type: Schema.Types.ObjectId,
+      ref: 'Yacht',
     },
     tokens: [
       {
@@ -54,9 +58,9 @@ const userSchema = new mongoose.Schema(
     settings: {
       private: {
         type: Boolean,
-        default:false
+        default: false,
       },
-  },
+    },
   },
   { timestamps: true }
 );
@@ -67,7 +71,7 @@ userSchema.virtual('entriesCount').get(function () {
 
 userSchema.methods.generateJwtToken = async function () {
   const user = this;
-  
+
   const token = jwt.sign({ _id: user.id.toString() }, process.env.JWT_SECRET);
 
   user.tokens = user.tokens.concat({ token });
