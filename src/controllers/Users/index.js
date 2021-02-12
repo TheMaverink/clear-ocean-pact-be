@@ -18,6 +18,48 @@ var mailgun = require('mailgun-js')({
   domain: process.env.MAILGUN_DOMAIN,
 });
 
+export const inviteUsers = async (req, res, next) => {
+  try {
+    const yachtId = req.user.yacht;
+    const { invitedEmail, invitedName } = req.body;
+
+    const adminName = req.user.name;
+
+    const currentYacht = await Yacht.findById(yachtId);
+
+    const yachtUniqueName = currentYacht.yachtUniqueName;
+
+    await currentYacht.invitedUsers.push({email:invitedEmail, name:invitedName})
+    await currentYacht.save()
+
+
+
+    var data = {
+      from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
+      to: `${invitedEmail}`,
+      subject: 'Invite',
+      text: `hi ${invitedName} Please help us confirm your account for Clear Ocean Project`,
+      html: `<h1>${adminName} invited you to join the yacht with the unique name ${yachtUniqueName} </h1>
+      <h2>Please download the app, create an account and join his yacht</h2>
+
+      `,
+    };
+
+    mailgun.messages().send(data, function (error, body) {
+      if (error) {
+        console.log(error);
+      }
+      console.log('Email was sent');
+      console.log(body);
+    });
+
+    res.json(currentYacht);
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};
+
 export const getUser = async (req, res, next) => {
   try {
     const specificUser = await User.findById(
