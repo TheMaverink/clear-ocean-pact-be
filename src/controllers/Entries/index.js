@@ -13,12 +13,13 @@ const s3 = new AWS.S3({
 });
 
 export const createEntry = async (req, res, next) => {
-  const { EntryImageInput, EntryLocationInput, EntryTypesInput } = req.body;
-console.log(EntryImageInput)
+  const { latitude, longitude } = req.body;
+  const types = JSON.parse(req.body.types);
+
   try {
     let entryImgUrl = null;
 
-    if (EntryImageInput) {
+    if (req.file) {
       const bucketUrl =
         'https://' +
         process.env.BUCKET_NAME +
@@ -26,7 +27,6 @@ console.log(EntryImageInput)
         process.env.BUCKET_REGION +
         '.amazonaws.com/';
 
-      console.log('is gona upload yacht img');
       function uploadFile(buffer, fileName) {
         return new Promise((resolve, reject) => {
           s3.upload(
@@ -49,24 +49,21 @@ console.log(EntryImageInput)
         });
       }
 
-      // entryImgUrl = await uploadFile(
-      //   req.file.buffer,
-      //   Date.now().toString()
-      // ).then((result) => bucketUrl + result);
+      entryImgUrl = await uploadFile(
+        req.file.buffer,
+        Date.now().toString()
+      ).then((result) => bucketUrl + result);
     }
 
     const location = {
       type: 'Point',
-      coordinates: [
-        EntryLocationInput.coords.longitude,
-        EntryLocationInput.coords.latitude,
-      ],
+      coordinates: [longitude, latitude],
     };
 
     const newEntry = new Entry({
       location,
-      types: EntryTypesInput,
-      // imageUrl: entryImgUrl || null,
+      types,
+      imageUrl: entryImgUrl || null,
       author: req.user.id,
       yacht: req.user.yacht,
     });
@@ -159,12 +156,12 @@ export const getAllGlobalEntries = async (req, res, next) => {
 };
 
 export const getAllYachtEntries = async (req, res, next) => {
-  const { yachtId } = req.body;
-
   try {
-    const yachtEntries = await Yacht.find({ _id: yachtId }).populate('entries');
+    const yachtEntries = await Yacht.find({ _id: req.user.yacht }).populate(
+      'entries'
+    );
 
-    res.json(yachtEntries.entries);
+    res.json(yachtEntries[0].entries);
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);

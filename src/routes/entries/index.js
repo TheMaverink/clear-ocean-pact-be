@@ -11,10 +11,17 @@ import {
   deleteEntry,
 } from '@controllers/Entries';
 
+var multer = require('multer');
+var upload = multer({
+  // limits: { fileSize: 1024 * 1024 },
+});
+var type = upload.single('entryImage');
+var userType = upload.single('entryImage');
+
 //ADD AUTH MIDDLEWARE!
-router.get('/all/global', getAllGlobalEntries);
-router.get('/all/yacht', getAllYachtEntries);
-router.post('/create', auth,createEntry);
+router.get('/all/global',auth, getAllGlobalEntries);
+router.get('/all/yacht',auth, getAllYachtEntries);
+router.post('/create', auth,userType, createEntry);
 router.post('/edit/:id', editEntry);
 router.delete('/delete/:id', deleteEntry);
 

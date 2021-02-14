@@ -180,7 +180,7 @@ export const updateUser = async (req, res, next) => {
     process.env.BUCKET_REGION +
     '.amazonaws.com/';
 
-  let profileImage = 'path to default image';
+  let profileImage = null;
   try {
     if (req.file) {
       function uploadFile(buffer, fileName) {
