@@ -84,7 +84,7 @@ export const createYacht = async (req, res, next) => {
       officialNumber,
       name: yachtName,
       flag,
-      yachtImageUrl,
+      yachtImage: yachtImageUrl,
       admin: user._id,
     });
     await yacht.save();

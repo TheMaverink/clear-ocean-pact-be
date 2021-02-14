@@ -14,7 +14,7 @@ import {
 //ADD AUTH MIDDLEWARE!
 router.get('/all/global', getAllGlobalEntries);
 router.get('/all/yacht', getAllYachtEntries);
-router.post('/create', createEntry);
+router.post('/create', auth,createEntry);
 router.post('/edit/:id', editEntry);
 router.delete('/delete/:id', deleteEntry);
 

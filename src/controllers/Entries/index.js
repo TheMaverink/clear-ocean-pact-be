@@ -12,6 +12,141 @@ const s3 = new AWS.S3({
   region: process.env.BUCKET_REGION,
 });
 
+export const createEntry = async (req, res, next) => {
+  const { EntryImageInput, EntryLocationInput, EntryTypesInput } = req.body;
+console.log(EntryImageInput)
+  try {
+    let entryImgUrl = null;
+
+    if (EntryImageInput) {
+      const bucketUrl =
+        'https://' +
+        process.env.BUCKET_NAME +
+        '.s3.' +
+        process.env.BUCKET_REGION +
+        '.amazonaws.com/';
+
+      console.log('is gona upload yacht img');
+      function uploadFile(buffer, fileName) {
+        return new Promise((resolve, reject) => {
+          s3.upload(
+            {
+              Body: buffer,
+              Key: fileName,
+              Bucket: process.env.BUCKET_NAME,
+              ContentType: 'image/jpeg',
+            },
+            (error) => {
+              if (error) {
+                console.log(error);
+                reject(error);
+              } else {
+                console.info(fileName);
+                resolve(fileName);
+              }
+            }
+          );
+        });
+      }
+
+      // entryImgUrl = await uploadFile(
+      //   req.file.buffer,
+      //   Date.now().toString()
+      // ).then((result) => bucketUrl + result);
+    }
+
+    const location = {
+      type: 'Point',
+      coordinates: [
+        EntryLocationInput.coords.longitude,
+        EntryLocationInput.coords.latitude,
+      ],
+    };
+
+    const newEntry = new Entry({
+      location,
+      types: EntryTypesInput,
+      // imageUrl: entryImgUrl || null,
+      author: req.user.id,
+      yacht: req.user.yacht,
+    });
+
+    await newEntry.save();
+
+    const yachtToUpdate = await Yacht.findById(newEntry.yacht);
+
+    await yachtToUpdate.entries.push(newEntry);
+
+    await yachtToUpdate.save();
+
+    res.status(200).send(newEntry);
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+
+  // const {
+  //   entryImage,
+  //   entryLocation,
+  //   entryTypes,
+  //   entryAuthor,
+  //   entryYacht,
+  // } = req.body;
+
+  // const bucketUrl =
+  //   'https://' +
+  //   process.env.BUCKET_NAME +
+  //   '.s3.' +
+  //   process.env.BUCKET_REGION +
+  //   '.amazonaws.com/';
+
+  // // const { user } = req;
+
+  // try {
+  //   // let yacht = await Yacht.findOne({ yachtUniqueName });
+
+  //   console.log('is gona upload yacht img');
+  //   function uploadFile(buffer, fileName) {
+  //     return new Promise((resolve, reject) => {
+  //       s3.upload(
+  //         {
+  //           Body: buffer,
+  //           Key: fileName,
+  //           Bucket: process.env.BUCKET_NAME,
+  //           ContentType: 'image/jpeg',
+  //         },
+  //         (error) => {
+  //           if (error) {
+  //             console.log(error);
+  //             reject(error);
+  //           } else {
+  //             console.info(fileName);
+  //             resolve(fileName);
+  //           }
+  //         }
+  //       );
+  //     });
+  //   }
+
+  //   entryImgUrl = await uploadFile(req.file.buffer, Date.now().toString()).then(
+  //     (result) => bucketUrl + result
+  //   );
+
+  //   const entry = new Entry({
+  //     author: entryAuthor,
+  //     yacht: entryYacht,
+  //     location: entryLocation,
+  //     imageUrl: entryImgUrl,
+  //     types: entryTypes,
+  //   });
+  //   await entry.save();
+  //   res.status(200).send({ entry });
+  // } catch (error) {
+  //   console.error(error.message);
+  //   res.status(500).send('Server error');
+  // }
+};
+
 export const getAllGlobalEntries = async (req, res, next) => {
   try {
     const globalEntries = await Entry.find({});
@@ -33,69 +168,6 @@ export const getAllYachtEntries = async (req, res, next) => {
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);
-  }
-};
-
-export const createEntry = async (req, res, next) => {
-  const {
-    entryImage,
-    entryLocation,
-    entryTypes,
-    entryAuthor,
-    entryYacht,
-  } = req.body;
-
-  const bucketUrl =
-    'https://' +
-    process.env.BUCKET_NAME +
-    '.s3.' +
-    process.env.BUCKET_REGION +
-    '.amazonaws.com/';
-
-  // const { user } = req;
-
-  try {
-    // let yacht = await Yacht.findOne({ yachtUniqueName });
-
-    console.log('is gona upload yacht img');
-    function uploadFile(buffer, fileName) {
-      return new Promise((resolve, reject) => {
-        s3.upload(
-          {
-            Body: buffer,
-            Key: fileName,
-            Bucket: process.env.BUCKET_NAME,
-            ContentType: 'image/jpeg',
-          },
-          (error) => {
-            if (error) {
-              console.log(error);
-              reject(error);
-            } else {
-              console.info(fileName);
-              resolve(fileName);
-            }
-          }
-        );
-      });
-    }
-
-    entryImgUrl = await uploadFile(req.file.buffer, Date.now().toString()).then(
-      (result) => bucketUrl + result
-    );
-
-    const entry = new Entry({
-      author: entryAuthor,
-      yacht: entryYacht,
-      location: entryLocation,
-      imageUrl: entryImgUrl,
-      types: entryTypes,
-    });
-    await entry.save();
-    res.status(200).send({ entry });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).send('Server error');
   }
 };
 

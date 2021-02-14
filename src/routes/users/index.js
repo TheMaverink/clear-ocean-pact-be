@@ -16,7 +16,7 @@ import { userValidationRules, validate } from '@utils/validator';
 
 var multer = require('multer');
 var upload = multer({
-  limits: { fileSize: 1024 * 1024 },
+  // limits: { fileSize: 1024 * 1024 },
 });
 var type = upload.single('profileImage');
 var userType = upload.single('profileImage');
