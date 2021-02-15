@@ -146,7 +146,10 @@ export const createEntry = async (req, res, next) => {
 
 export const getAllGlobalEntries = async (req, res, next) => {
   try {
-    const globalEntries = await Entry.find({});
+    const globalEntries = await Entry.find({}).populate(
+      'author',
+      '-tokens -password'
+    );
 
     res.json(globalEntries);
   } catch (error) {
