@@ -157,11 +157,14 @@ export const getAllGlobalEntries = async (req, res, next) => {
 
 export const getAllYachtEntries = async (req, res, next) => {
   try {
-    const yachtEntries = await Yacht.find({ _id: req.user.yacht }).populate(
-      'entries'
+    const yachtId = req.user.yacht;
+
+    const yachtEntries = await Entry.find({ yacht: yachtId }).populate(
+      'author',
+      '-tokens -password'
     );
 
-    res.json(yachtEntries[0].entries);
+    res.json(yachtEntries);
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);
