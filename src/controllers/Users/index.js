@@ -9,6 +9,8 @@ const s3 = new AWS.S3({
 // import S3 from 'aws-sdk/clients/s3';
 dotenv.config({ path: '.env' });
 
+let nodeEnv = process.env.NODE_ENV;
+
 import express from 'express';
 import bcrypt from 'bcrypt';
 import User from '@models/User';
@@ -29,10 +31,11 @@ export const inviteUsers = async (req, res, next) => {
 
     const yachtUniqueName = currentYacht.yachtUniqueName;
 
-    await currentYacht.invitedUsers.push({email:invitedEmail, name:invitedName})
-    await currentYacht.save()
-
-
+    await currentYacht.invitedUsers.push({
+      email: invitedEmail,
+      name: invitedName,
+    });
+    await currentYacht.save();
 
     var data = {
       from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
@@ -113,16 +116,22 @@ export const registerUser = async (req, res, next) => {
 
     const token = await user.generateJwtToken();
 
+    const baseUrl =
+      nodeEnv === 'development'
+        ? process.env.DEV_BASE_URL
+        : process.env.PROD_BASE_URL;
+
     var data = {
       from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
-      to: 'teesace@gmail.com',
+      to: `${email}`,
       subject: 'Email Verification',
       text: 'Please help us confirm your account for Clear Ocean Project',
       html: `
      
+      <h1>Welcome ${name}</h1>
       <h2>Please click on the given link to activate your account</h2>
 
-      <a href="${process.env.DEV_BASE_URL}/api/users/verify/${token}">This is a regular link</a>
+      <a href="${baseUrl}/api/users/verify/${token}">This is a regular link</a>
 
      
       `,
@@ -166,23 +175,22 @@ export const verifyUser = async (req, res, next) => {
 };
 
 export const updateUser = async (req, res, next) => {
+  const { yachtUniqueName } = req.body;
+
   const updates = Object.keys(req.body).filter(
-    (item) => item !== 'token' && item !== 'userId'
+    (item) => item !== 'token' && item !== 'yachtUniqueName'
   );
-  console.log(updates);
 
-  const userToUpdate = await User.findById(req.body.userId);
-
-  const bucketUrl =
-    'https://' +
-    process.env.BUCKET_NAME +
-    '.s3.' +
-    process.env.BUCKET_REGION +
-    '.amazonaws.com/';
-
-  let profileImage = null;
   try {
     if (req.file) {
+      const bucketUrl =
+        'https://' +
+        process.env.BUCKET_NAME +
+        '.s3.' +
+        process.env.BUCKET_REGION +
+        '.amazonaws.com/';
+
+      let profileImage = null;
       function uploadFile(buffer, fileName) {
         return new Promise((resolve, reject) => {
           s3.upload(
@@ -212,18 +220,7 @@ export const updateUser = async (req, res, next) => {
       req.user['profileImage'] = profileImage;
     }
 
-    //---
-
-    const allowedUpdates = [
-      'name',
-      'position',
-      'settings',
-      'password',
-      'isEmailVerified',
-      'isAdmin',
-      //receive var is admin true?
-      'profileImage',
-    ];
+    const allowedUpdates = ['position', 'profileImage'];
 
     const updateAllowed = updates.every((update) =>
       allowedUpdates.includes(update)
@@ -233,18 +230,21 @@ export const updateUser = async (req, res, next) => {
       console.log('invalid updates');
       return res.status(400).send({ error: 'Invalid updates!' });
     }
+    updates.forEach((update) => (req.user[update] = req.body[update]));
 
-    // updates.forEach((update) => (req.user[update] = req.body[update]));
+    const yachtToUpdate = await Yacht.findOneAndUpdate(
+      { yachtUniqueName: yachtUniqueName },
+      { $push: { users: req.user._id } }
+    );
 
-    updates.forEach((update) => (userToUpdate[update] = req.body[update]));
+    const userToUpdate = await User.findOneAndUpdate(
+      { _id: req.user.id },
+      { yacht: yachtToUpdate._id }
+    );
 
-    if (req.path === '/updateAdmin') {
-      req.user['isAdmin'] = true;
-    }
-    // await req.user.save();
-    await userToUpdate.save();
+    await req.user.save();
 
-    res.status(200).send(userToUpdate);
+    res.status(200).send(req.user);
   } catch (error) {
     console.log('error from catch backend');
     console.log(error);
@@ -360,7 +360,7 @@ export const getAllUsers = async (req, res, next) => {
   try {
     const allUsers = await User.find(
       {},
-      'name email isAdmin role position entries settings'
+      'name email isAdmin role position entries settings yacht'
     );
 
     res.json(allUsers);

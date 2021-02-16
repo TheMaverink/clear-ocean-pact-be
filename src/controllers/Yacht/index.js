@@ -105,7 +105,7 @@ export const createYacht = async (req, res, next) => {
 export const populateInvites = async (req, res, next) => {
   try {
     let doc = await Yacht.findOneAndUpdate(
-      { yachtUniqueName: 'TestPOR' },
+      { yachtUniqueName: 'LeoboatPOR' },
       {
         invitedUsers: [
           { email: 'a@a.com', name: 'ju' },

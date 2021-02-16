@@ -45,7 +45,7 @@ router.get('/current', auth, getCurrentUser);
 router.post('/register/user', userValidationRules(), validate, registerUser); //just use this from admin?
 router.get('/verify/:token', verifyUser);
 router.get('/isUserInvited', auth, isUserInvited);
-router.post('/updateUser', userType, updateUser);
+router.post('/updateUser', auth, userType, updateUser);
 router.post('/updateAdmin', auth, type, updateAdmin);
 router.post('/login', userValidationRules(), validate, loginUser);
 router.post('/join-yacht', auth, joinYacht);
