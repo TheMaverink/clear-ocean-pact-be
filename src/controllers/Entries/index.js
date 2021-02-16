@@ -1,4 +1,5 @@
 import Yacht from '@models/Yacht';
+import User from '@models/User';
 import Entry from '@models/Entry';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
@@ -76,6 +77,11 @@ export const createEntry = async (req, res, next) => {
 
     await yachtToUpdate.save();
 
+    const userToUpdate = await User.findOneAndUpdate(
+      { _id: req.user._id },
+      { $push: { entries: newEntry._id } }
+    );
+    await userToUpdate.save();
     res.status(200).send(newEntry);
   } catch (error) {
     res.status(500).send('Server Error');

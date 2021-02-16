@@ -360,7 +360,7 @@ export const getAllUsers = async (req, res, next) => {
   try {
     const allUsers = await User.find(
       {},
-      'name email isAdmin role position entries settings yacht'
+      'name email isAdmin role position entries settings yacht profileImage'
     );
 
     res.json(allUsers);
