@@ -55,11 +55,15 @@ const userSchema = new mongoose.Schema(
         ref: 'Entry',
       },
     ],
-    settings: {
-      private: {
-        type: Boolean,
-        default: false,
-      },
+    // settings: {
+    //   private: {
+    //     type: Boolean,
+    //     default: false,
+    //   },
+    // },
+    isPrivateProfile: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

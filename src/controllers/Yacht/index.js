@@ -158,3 +158,80 @@ export const getCurrentYacht = async (req, res, next) => {
     console.log(error.message);
   }
 };
+
+export const updateYacht = async (req, res, next) => {
+  try {
+    // const currentUserYacht = await Yacht.findById(req.user.yacht);
+
+    const updates = Object.keys(req.body).filter(
+      (item) => item !== 'token' && item !== 'yachtId'
+    );
+
+    const currentUserYacht = await Yacht.findById(req.body.yachtId);
+
+    try {
+      if (req.file) {
+        const bucketUrl =
+          'https://' +
+          process.env.BUCKET_NAME +
+          '.s3.' +
+          process.env.BUCKET_REGION +
+          '.amazonaws.com/';
+
+        let yachtImage = null;
+        function uploadFile(buffer, fileName) {
+          return new Promise((resolve, reject) => {
+            s3.upload(
+              {
+                Body: buffer,
+                Key: fileName,
+                Bucket: process.env.BUCKET_NAME,
+                ContentType: 'image/jpeg',
+              },
+              (error) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  console.info(fileName);
+                  resolve(fileName);
+                }
+              }
+            );
+          });
+        }
+
+        yachtImage = await uploadFile(
+          req.file.buffer,
+          Date.now().toString()
+        ).then((result) => bucketUrl + result);
+
+        currentUserYacht['yachtImage'] = yachtImage;
+      }
+
+      const allowedUpdates = ['yachtImage', 'isPrivateProfile'];
+
+      const updateAllowed = updates.every((update) =>
+        allowedUpdates.includes(update)
+      );
+
+      if (!updateAllowed) {
+        console.log('invalid updates');
+        return res.status(400).send({ error: 'Invalid updates!' });
+      }
+      updates.forEach(
+        (update) => (currentUserYacht[update] = req.body[update])
+      );
+
+      await currentUserYacht.save();
+
+      res.status(200).send(req.user);
+    } catch (error) {
+      console.log('error from catch backend');
+      console.log(error);
+      res.status(400).send(error);
+    }
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};

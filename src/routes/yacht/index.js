@@ -8,7 +8,7 @@ import {
   populateInvites,
   // getYacht,
   getCurrentYacht,
-  editYacht,
+  updateYacht,
 } from '@controllers/Yacht';
 var multer = require('multer');
 var upload = multer({
@@ -22,6 +22,6 @@ router.get('/current', auth, getCurrentYacht);
 // router.get('/edit/:token', auth, editYacht);
 router.post('/new', auth, type, createYacht);
 router.get('/populate', populateInvites);
-// router.put('/edit', auth, editYacht)
+router.post('/updateYacht', auth, type, updateYacht);
 
 export default router;

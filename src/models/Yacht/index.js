@@ -56,11 +56,15 @@ const yachtSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    settings: {
-      private: {
-        type: Boolean,
-        default: false,
-      },
+    // settings: {
+    //   private: {
+    //     type: Boolean,
+    //     default: false,
+    //   },
+    // },
+    isPrivateProfile: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

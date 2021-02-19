@@ -175,11 +175,16 @@ export const verifyUser = async (req, res, next) => {
 };
 
 export const updateUser = async (req, res, next) => {
-  const { yachtUniqueName } = req.body;
+  const currentUserYacht = await Yacht.findById(req.user.yacht);
+  const { yachtUniqueName } = currentUserYacht;
 
   const updates = Object.keys(req.body).filter(
     (item) => item !== 'token' && item !== 'yachtUniqueName'
   );
+
+  console.log(updates)
+
+  console.log(req.body.isPrivateProfile)
 
   try {
     if (req.file) {
@@ -220,7 +225,7 @@ export const updateUser = async (req, res, next) => {
       req.user['profileImage'] = profileImage;
     }
 
-    const allowedUpdates = ['position', 'profileImage'];
+    const allowedUpdates = ['position', 'profileImage', 'isPrivateProfile'];
 
     const updateAllowed = updates.every((update) =>
       allowedUpdates.includes(update)
@@ -232,6 +237,7 @@ export const updateUser = async (req, res, next) => {
     }
     updates.forEach((update) => (req.user[update] = req.body[update]));
 
+    //IF NOT EXISTENT
     const yachtToUpdate = await Yacht.findOneAndUpdate(
       { yachtUniqueName: yachtUniqueName },
       { $push: { users: req.user._id } }
