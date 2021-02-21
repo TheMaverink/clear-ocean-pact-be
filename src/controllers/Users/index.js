@@ -23,9 +23,9 @@ var mailgun = require('mailgun-js')({
 export const inviteUsers = async (req, res, next) => {
   try {
     const yachtId = req.user.yacht;
-    const { invitedEmail, invitedName } = req.body;
+    const { invitedEmail, invitedFirstName, invitedLastName} = req.body;
 
-    const adminName = req.user.name;
+    const adminName = `${req.user.firstName} ${req.user.lastName}`;
 
     const currentYacht = await Yacht.findById(yachtId);
 
@@ -33,7 +33,8 @@ export const inviteUsers = async (req, res, next) => {
 
     await currentYacht.invitedUsers.push({
       email: invitedEmail,
-      name: invitedName,
+      invitedFirstName: invitedFirstName,
+      invitedLastName: invitedLastName,
     });
     await currentYacht.save();
 
@@ -41,7 +42,7 @@ export const inviteUsers = async (req, res, next) => {
       from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
       to: `${invitedEmail}`,
       subject: 'Invite',
-      text: `hi ${invitedName} Please help us confirm your account for Clear Ocean Project`,
+      text: `hi ${invitedFirstName} Please help us confirm your account for Clear Ocean Project`,
       html: `<h1>${adminName} invited you to join the yacht with the unique name ${yachtUniqueName} </h1>
       <h2>Please download the app, create an account and join his yacht</h2>
 
@@ -67,7 +68,7 @@ export const getUser = async (req, res, next) => {
   try {
     const specificUser = await User.findById(
       req.params.id,
-      'name email isAdmin position entries settings'
+      'firstName lastName email isAdmin position entries settings'
     );
 
     res.json(specificUser);
@@ -91,7 +92,7 @@ export const getCurrentUser = async (req, res, next) => {
 };
 
 export const registerUser = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { firstName,lastName, email, password } = req.body;
 
   try {
     let user = await User.findOne({ email });
@@ -108,7 +109,8 @@ export const registerUser = async (req, res, next) => {
 
     user = new User({
       email,
-      name,
+      firstName,
+      lastName,
       password,
     });
 
@@ -128,7 +130,7 @@ export const registerUser = async (req, res, next) => {
       text: 'Please help us confirm your account for Clear Ocean Project',
       html: `
      
-      <h1>Welcome ${name}</h1>
+      <h1>Welcome ${firstName}</h1>
       <h2>Please click on the given link to activate your account</h2>
 
       <a href="${baseUrl}/api/users/verify/${token}">This is a regular link</a>
@@ -303,7 +305,8 @@ export const updateAdmin = async (req, res, next) => {
     //---
 
     const allowedUpdates = [
-      'name',
+      'firstName',
+      'lastName',
       'position',
       'settings',
       'password',
@@ -366,7 +369,7 @@ export const getAllUsers = async (req, res, next) => {
   try {
     const allUsers = await User.find(
       {},
-      'name email isAdmin role position entries settings yacht profileImage'
+      'firstName lastName email isAdmin role position entries settings yacht profileImage'
     );
 
     res.json(allUsers);
