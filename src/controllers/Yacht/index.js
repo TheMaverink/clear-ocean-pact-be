@@ -19,10 +19,13 @@ export const createYacht = async (req, res, next) => {
     process.env.BUCKET_REGION +
     '.amazonaws.com/';
   const { yachtName, flag, officialNumber, token } = req.body;
-  let yachtImageUrl = 'path to default image';
+  let yachtImageUrl ;
   // console.log(yachtName+flag+officialNumber)
   const { user } = req;
-  const yachtUniqueName = flag + yachtName.trim();
+  const yachtUniqueName = yachtName.replace(/\s/g, "") + flag;
+
+  console.log('yachtUniqueName')
+  console.log(yachtUniqueName)
 
   try {
     let yacht = await Yacht.findOne({ yachtUniqueName });
@@ -86,8 +89,11 @@ export const createYacht = async (req, res, next) => {
       flag,
       yachtImage: yachtImageUrl,
       admin: user._id,
+      users:[user._id]
     });
     await yacht.save();
+
+    console.log(yacht)
 
     const currentUser = await User.findById(req.user.id);
 
@@ -105,7 +111,7 @@ export const createYacht = async (req, res, next) => {
 export const populateInvites = async (req, res, next) => {
   try {
     let doc = await Yacht.findOneAndUpdate(
-      { yachtUniqueName: 'TestboatCAN' },
+      { yachtUniqueName: 'JuboatBRA' },
       {
         invitedUsers: [
           { email: 'a@a.com', firstName: 'ju' },

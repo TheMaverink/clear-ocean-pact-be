@@ -262,7 +262,8 @@ export const updateUser = async (req, res, next) => {
 
 export const updateAdmin = async (req, res, next) => {
   const updates = Object.keys(req.body).filter((item) => item !== 'token');
-
+console.log('updates')
+console.log(updates)
   const bucketUrl =
     'https://' +
     process.env.BUCKET_NAME +
@@ -270,7 +271,7 @@ export const updateAdmin = async (req, res, next) => {
     process.env.BUCKET_REGION +
     '.amazonaws.com/';
 
-  let profileImage = 'path to default image';
+  let profileImage ;
   try {
     if (req.file) {
       function uploadFile(buffer, fileName) {
@@ -370,7 +371,9 @@ export const getAllUsers = async (req, res, next) => {
     const allUsers = await User.find(
       {},
       'firstName lastName email isAdmin role position entries settings yacht profileImage'
-    );
+    ).populate('entries')
+
+    console.log(allUsers)
 
     res.json(allUsers);
   } catch (error) {

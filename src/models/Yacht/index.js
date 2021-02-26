@@ -70,14 +70,15 @@ const yachtSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-yachtSchema.pre('save', async function (next) {
-  if (this.isModified('name') || this.isModified('flag')) {
-    const yachtUniqueName = this.name + this.flag;
-    this.yachtUniqueName = yachtUniqueName;
-  }
+// yachtSchema.pre('save', async function (next) {
+//   if (this.isModified('name') || this.isModified('flag')) {
+//     const yachtUniqueName = this.name.replace(/\s/g, "") + this.flag;
+//     console.log(yachtUniqueName)
+//     this.yachtUniqueName = yachtUniqueName;
+//   }
 
-  next();
-});
+//   next();
+// });
 
 const Yacht = mongoose.model('Yacht', yachtSchema);
 
