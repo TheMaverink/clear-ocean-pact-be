@@ -33,7 +33,8 @@ import {
   joinYacht,
   isUserInvited,
   getCurrentUser,
-  inviteUsers
+  inviteUsers,
+
 } from '@controllers/Users';
 
 const router = Router();
@@ -46,6 +47,7 @@ router.post('/register/user', userValidationRules(), validate, registerUser); //
 router.get('/verify/:token', verifyUser);
 router.get('/isUserInvited', auth, isUserInvited);
 router.post('/updateUser', auth, userType, updateUser);
+router.post('/joinYacht', auth, userType, joinYacht);
 router.post('/updateAdmin', auth, type, updateAdmin);
 router.post('/login', userValidationRules(), validate, loginUser);
 router.post('/join-yacht', auth, joinYacht);

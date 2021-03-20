@@ -32,7 +32,7 @@ export const inviteUsers = async (req, res, next) => {
     const yachtUniqueName = currentYacht.yachtUniqueName;
 
     await currentYacht.invitedUsers.push({
-      email: invitedEmail,
+      email: invitedEmail.toLowerCase(),
       invitedFirstName: invitedFirstName,
       invitedLastName: invitedLastName,
     });
@@ -413,7 +413,84 @@ export const isUserInvited = async (req, res, next) => {
 
 export const joinYacht = async (req, res, next) => {
   try {
-    console.log(req.body);
+    const { user } = await req;
+
+    const currentUser= await User.findById(req.user._id);
+
+    const query = await Yacht.find({ 'invitedUsers.email': user.email });
+
+const yachtId = query[0]._id
+currentUser.yacht = yachtId
+
+const updates = Object.keys(req.body).filter(
+  (item) => item !== 'token' && item !== 'yachtUniqueName'
+);
+
+  if (req.file) {
+    const bucketUrl =
+      'https://' +
+      process.env.BUCKET_NAME +
+      '.s3.' +
+      process.env.BUCKET_REGION +
+      '.amazonaws.com/';
+
+    let profileImage = null;
+    function uploadFile(buffer, fileName) {
+      return new Promise((resolve, reject) => {
+        s3.upload(
+          {
+            Body: buffer,
+            Key: fileName,
+            Bucket: process.env.BUCKET_NAME,
+            ContentType: 'image/jpeg',
+          },
+          (error) => {
+            if (error) {
+              reject(error);
+            } else {
+              console.info(fileName);
+              resolve(fileName);
+            }
+          }
+        );
+      });
+    }
+
+    profileImage = await uploadFile(
+      req.file.buffer,
+      Date.now().toString()
+    ).then((result) => bucketUrl + result);
+
+    req.user['profileImage'] = profileImage;
+  }
+
+  const allowedUpdates = ['position', 'profileImage'];
+
+  const updateAllowed = updates.every((update) =>
+    allowedUpdates.includes(update)
+  );
+
+  if (!updateAllowed) {
+    console.log('invalid updates');
+    return res.status(400).send({ error: 'Invalid updates!' });
+  }
+  updates.forEach((update) => (req.user[update] = req.body[update]));
+
+ 
+  const yachtToUpdate = await Yacht.findOneAndUpdate(
+    { _id: yachtId },
+    { $push: { users: req.user._id } }
+  );
+
+  const userToUpdate = await User.findOneAndUpdate(
+    { _id: req.user.id },
+    { yacht: yachtId}
+  );
+
+  await req.user.save();
+
+  res.status(200).send(req.user);
+   
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);

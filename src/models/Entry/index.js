@@ -23,7 +23,7 @@ const entrySchema = new mongoose.Schema(
       required: true,
     },
 
-    imageUrl: {
+    imageUrls: {
       type: [String],
     },
     types: {
