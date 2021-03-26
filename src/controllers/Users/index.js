@@ -99,11 +99,7 @@ export const registerUser = async (req, res, next) => {
 
     if (user) {
       return res.status(400).json({
-        errors: [
-          {
-            msg: 'Sorry, there is a user already registered with this email!',
-          },
-        ],
+        msg:'Sorry, there is a user already registered with this email!',
       });
     }
 
@@ -346,13 +342,13 @@ export const loginUser = async (req, res, next) => {
 
   try {
     if (!user) {
-      return res.status(400).json({ errors: [{ msg: 'Invalid Credentials' }] });
+      return res.status(400).json({ msg:'Invalid Credentials'} );
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ errors: [{ msg: 'Invalid Credentials' }] });
+      return res.status(400).json({ msg:'Invalid Credentials'} );
     }
 
     const token = await user.generateJwtToken();
