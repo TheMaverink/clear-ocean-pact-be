@@ -23,7 +23,7 @@ var mailgun = require('mailgun-js')({
 export const inviteUsers = async (req, res, next) => {
   try {
     const yachtId = req.user.yacht;
-    const { invitedEmail, invitedFirstName, invitedLastName} = req.body;
+    const { invitedEmail, invitedFirstName, invitedLastName } = req.body;
 
     const adminName = `${req.user.firstName} ${req.user.lastName}`;
 
@@ -80,10 +80,16 @@ export const getUser = async (req, res, next) => {
 
 export const getCurrentUser = async (req, res, next) => {
   try {
-    const currentUser = await User.findById(req.user.id).select(
-      '-tokens -password'
-    );
+    const currentUser = await User.findById(req.user.id)
+      .select('-tokens -password')
+      .populate('yacht');
 
+    // const currentUser = await User.findById(req.user.id).populate('yacht');
+
+    // const currentUser = await User.findById(req.user.id)
+
+    console.log('from getCurrentUser');
+    console.log(currentUser);
     res.json(currentUser);
   } catch (error) {
     res.status(500).send('Server Error');
@@ -92,14 +98,14 @@ export const getCurrentUser = async (req, res, next) => {
 };
 
 export const registerUser = async (req, res, next) => {
-  const { firstName,lastName, email, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
   try {
     let user = await User.findOne({ email });
 
     if (user) {
       return res.status(400).json({
-        msg:'Sorry, there is a user already registered with this email!',
+        msg: 'Sorry, there is a user already registered with this email!',
       });
     }
 
@@ -180,9 +186,9 @@ export const updateUser = async (req, res, next) => {
     (item) => item !== 'token' && item !== 'yachtUniqueName'
   );
 
-  console.log(updates)
+  console.log(updates);
 
-  console.log(req.body.isPrivateProfile)
+  console.log(req.body.isPrivateProfile);
 
   try {
     if (req.file) {
@@ -258,8 +264,8 @@ export const updateUser = async (req, res, next) => {
 
 export const updateAdmin = async (req, res, next) => {
   const updates = Object.keys(req.body).filter((item) => item !== 'token');
-console.log('updates')
-console.log(updates)
+  console.log('updates');
+  console.log(updates);
   const bucketUrl =
     'https://' +
     process.env.BUCKET_NAME +
@@ -267,7 +273,7 @@ console.log(updates)
     process.env.BUCKET_REGION +
     '.amazonaws.com/';
 
-  let profileImage ;
+  let profileImage;
   try {
     if (req.file) {
       function uploadFile(buffer, fileName) {
@@ -342,13 +348,13 @@ export const loginUser = async (req, res, next) => {
 
   try {
     if (!user) {
-      return res.status(400).json({ msg:'Invalid Credentials'} );
+      return res.status(400).json({ msg: 'Invalid Credentials' });
     }
 
-  const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ msg:'Invalid Credentials'} );
+      return res.status(400).json({ msg: 'Invalid Credentials' });
     }
 
     const token = await user.generateJwtToken();
@@ -367,9 +373,9 @@ export const getAllUsers = async (req, res, next) => {
     const allUsers = await User.find(
       {},
       'firstName lastName email isAdmin role position entries settings yacht profileImage'
-    ).populate('entries')
+    ).populate('entries');
 
-    console.log(allUsers)
+    console.log(allUsers);
 
     res.json(allUsers);
   } catch (error) {
@@ -394,13 +400,21 @@ export const isUserInvited = async (req, res, next) => {
     const { user } = await req;
     const query = await Yacht.find({ 'invitedUsers.email': user.email });
 
+    // if (!query[0]) {
+    //   console.log('You need an invite first!');
+    //   return res
+    //     .status(400)
+    //     .json({ errors: [{ msg: 'You need an invite first!' }] });
+    // }
     if (!query[0]) {
       console.log('You need an invite first!');
       return res
-        .status(400)
-        .json({ errors: [{ msg: 'You need an invite first!' }] });
+        .status(200)
+        .json({ yachtUniqueName: null, isUserInvited: false });
     }
-    res.status(200).json({ yachtUniqueName: query[0].yachtUniqueName });
+    res
+      .status(200)
+      .json({ yachtUniqueName: query[0].yachtUniqueName, isUserInvited: true });
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);
@@ -411,82 +425,97 @@ export const joinYacht = async (req, res, next) => {
   try {
     const { user } = await req;
 
-    const currentUser= await User.findById(req.user._id);
+    const { yachtUniqueName } = req.body;
 
-    const query = await Yacht.find({ 'invitedUsers.email': user.email });
+    // const currentUser = await User.findById(req.user._id);
+    const currentYacht = await Yacht.findOneAndUpdate(
+      { yachtUniqueName: yachtUniqueName },
+      { $push: { users: req.user._id } }
+    );
+    // const currentYacht = await Yacht.find({ yachtUniqueName: yachtUniqueName });
+    console.log('currentYacht');
+    console.log(currentYacht);
 
-const yachtId = query[0]._id
-currentUser.yacht = yachtId
+    // const query = await Yacht.find({ 'invitedUsers.email': user.email });
 
-const updates = Object.keys(req.body).filter(
-  (item) => item !== 'token' && item !== 'yachtUniqueName'
-);
+    // console.log('query')
+    // console.log(query)
 
-  if (req.file) {
-    const bucketUrl =
-      'https://' +
-      process.env.BUCKET_NAME +
-      '.s3.' +
-      process.env.BUCKET_REGION +
-      '.amazonaws.com/';
+    // const yachtId = query[0]._id;
+    req.user['yacht'] = await currentYacht._id;
 
-    let profileImage = null;
-    function uploadFile(buffer, fileName) {
-      return new Promise((resolve, reject) => {
-        s3.upload(
-          {
-            Body: buffer,
-            Key: fileName,
-            Bucket: process.env.BUCKET_NAME,
-            ContentType: 'image/jpeg',
-          },
-          (error) => {
-            if (error) {
-              reject(error);
-            } else {
-              console.info(fileName);
-              resolve(fileName);
+    //   const currentYacht = await Yacht.findOneAndUpdate(
+    //     { yachtUniqueName: yachtUniqueName },
+    //   { $push: { users: req.user._id } }
+    // );
+
+    const updates = Object.keys(req.body).filter(
+      (item) => item !== 'token' && item !== 'yachtUniqueName'
+    );
+
+    if (req.file) {
+      const bucketUrl =
+        'https://' +
+        process.env.BUCKET_NAME +
+        '.s3.' +
+        process.env.BUCKET_REGION +
+        '.amazonaws.com/';
+
+      let profileImage = null;
+      function uploadFile(buffer, fileName) {
+        return new Promise((resolve, reject) => {
+          s3.upload(
+            {
+              Body: buffer,
+              Key: fileName,
+              Bucket: process.env.BUCKET_NAME,
+              ContentType: 'image/jpeg',
+            },
+            (error) => {
+              if (error) {
+                reject(error);
+              } else {
+                console.info(fileName);
+                resolve(fileName);
+              }
             }
-          }
-        );
-      });
+          );
+        });
+      }
+
+      profileImage = await uploadFile(
+        req.file.buffer,
+        Date.now().toString()
+      ).then((result) => bucketUrl + result);
+
+      req.user['profileImage'] = profileImage;
     }
 
-    profileImage = await uploadFile(
-      req.file.buffer,
-      Date.now().toString()
-    ).then((result) => bucketUrl + result);
+    const allowedUpdates = ['position', 'profileImage'];
 
-    req.user['profileImage'] = profileImage;
-  }
+    const updateAllowed = updates.every((update) =>
+      allowedUpdates.includes(update)
+    );
 
-  const allowedUpdates = ['position', 'profileImage'];
+    if (!updateAllowed) {
+      console.log('invalid updates');
+      return res.status(400).send({ error: 'Invalid updates!' });
+    }
+    updates.forEach((update) => (req.user[update] = req.body[update]));
 
-  const updateAllowed = updates.every((update) =>
-    allowedUpdates.includes(update)
-  );
+    // const yachtToUpdate = await Yacht.findOneAndUpdate(
+    //   { _id: yachtId },
+    //   { $push: { users: req.user._id } }
+    // );
 
-  if (!updateAllowed) {
-    console.log('invalid updates');
-    return res.status(400).send({ error: 'Invalid updates!' });
-  }
-  updates.forEach((update) => (req.user[update] = req.body[update]));
+    // const userToUpdate = await User.findOneAndUpdate(
+    //   { _id: req.user.id },
+    //   { yacht: yachtId }
+    // );
 
- 
-  const yachtToUpdate = await Yacht.findOneAndUpdate(
-    { _id: yachtId },
-    { $push: { users: req.user._id } }
-  );
+    await req.user.save();
 
-  const userToUpdate = await User.findOneAndUpdate(
-    { _id: req.user.id },
-    { yacht: yachtId}
-  );
-
-  await req.user.save();
-
-  res.status(200).send(req.user);
-   
+    res.status(200).send(req.user);
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);
