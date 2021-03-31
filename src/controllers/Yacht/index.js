@@ -1,31 +1,17 @@
 import Yacht from '@models/Yacht';
 import dotenv from 'dotenv';
-import jwt from 'jsonwebtoken';
+
 import User from '@models/User';
+import uploadToS3 from '@utils/uploadToS3';
 
 dotenv.config({ path: '.env' });
-const AWS = require('aws-sdk');
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY,
-  region: process.env.BUCKET_REGION,
-});
 
 export const createYacht = async (req, res, next) => {
-  const bucketUrl =
-    'https://' +
-    process.env.BUCKET_NAME +
-    '.s3.' +
-    process.env.BUCKET_REGION +
-    '.amazonaws.com/';
   const { yachtName, flag, officialNumber, token } = req.body;
-  let yachtImageUrl ;
+  let yachtImageUrl;
   // console.log(yachtName+flag+officialNumber)
   const { user } = req;
-  const yachtUniqueName = yachtName.replace(/\s/g, "") + flag;
-
-  console.log('yachtUniqueName')
-  console.log(yachtUniqueName)
+  const yachtUniqueName = yachtName.replace(/\s/g, '') + flag;
 
   try {
     let yacht = await Yacht.findOne({ yachtUniqueName });
@@ -54,32 +40,10 @@ export const createYacht = async (req, res, next) => {
 
     if (req.file) {
       console.log('is gona upload yacht img');
-      function uploadFile(buffer, fileName) {
-        return new Promise((resolve, reject) => {
-          s3.upload(
-            {
-              Body: buffer,
-              Key: fileName,
-              Bucket: process.env.BUCKET_NAME,
-              ContentType: 'image/jpeg',
-            },
-            (error) => {
-              if (error) {
-                console.log(error);
-                reject(error);
-              } else {
-                console.info(fileName);
-                resolve(fileName);
-              }
-            }
-          );
-        });
-      }
 
-      yachtImageUrl = await uploadFile(
-        req.file.buffer,
-        Date.now().toString()
-      ).then((result) => bucketUrl + result);
+      yachtImageUrl = await uploadToS3(req.file.buffer).then(
+        (result) => result
+      );
     }
 
     yacht = new Yacht({
@@ -89,11 +53,9 @@ export const createYacht = async (req, res, next) => {
       flag,
       yachtImage: yachtImageUrl,
       admin: user._id,
-      users:[user._id]
+      users: [user._id],
     });
     await yacht.save();
-
-    console.log(yacht)
 
     const currentUser = await User.findById(req.user.id);
 
@@ -177,39 +139,9 @@ export const updateYacht = async (req, res, next) => {
 
     try {
       if (req.file) {
-        const bucketUrl =
-          'https://' +
-          process.env.BUCKET_NAME +
-          '.s3.' +
-          process.env.BUCKET_REGION +
-          '.amazonaws.com/';
-
         let yachtImage = null;
-        function uploadFile(buffer, fileName) {
-          return new Promise((resolve, reject) => {
-            s3.upload(
-              {
-                Body: buffer,
-                Key: fileName,
-                Bucket: process.env.BUCKET_NAME,
-                ContentType: 'image/jpeg',
-              },
-              (error) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  console.info(fileName);
-                  resolve(fileName);
-                }
-              }
-            );
-          });
-        }
 
-        yachtImage = await uploadFile(
-          req.file.buffer,
-          Date.now().toString()
-        ).then((result) => bucketUrl + result);
+        yachtImage = await uploadToS3(req.file.buffer).then((result) => result);
 
         currentUserYacht['yachtImage'] = yachtImage;
       }

@@ -2,79 +2,27 @@ import Yacht from '@models/Yacht';
 import User from '@models/User';
 import Entry from '@models/Entry';
 import dotenv from 'dotenv';
-import jwt from 'jsonwebtoken';
+import uploadToS3 from '@utils/uploadToS3';
 
 dotenv.config({ path: '.env' });
-
-const AWS = require('aws-sdk');
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY,
-  region: process.env.BUCKET_REGION,
-});
 
 export const createEntry = async (req, res, next) => {
   const { latitude, longitude } = req.body;
   const types = JSON.parse(req.body.types);
-  console.log('REQ BODYYY')
-  console.log(req.body)
-  console.log('REQ BODYYY')
 
   try {
-    const bucketUrl =
-      'https://' +
-      process.env.BUCKET_NAME +
-      '.s3.' +
-      process.env.BUCKET_REGION +
-      '.amazonaws.com/';
-
-    function uploadFile(buffer, fileName) {
-      return new Promise((resolve, reject) => {
-        s3.upload(
-          {
-            Body: buffer,
-            Key: fileName,
-            Bucket: process.env.BUCKET_NAME,
-            ContentType: 'image/jpeg',
-          },
-          (error) => {
-            if (error) {
-              console.log(error);
-              reject(error);
-            } else {
-              console.info(fileName);
-              resolve(fileName);
-            }
-          }
-        );
-      });
-    }
-
     const promises = [];
 
-  
-
     req.files.forEach((file) => {
-      // console.log(file)
-      promises.push(uploadFile(file.buffer, Date.now().toString()));
+      promises.push(uploadToS3(file.buffer).then((result) => result));
     });
 
     const imageSavedUrls = await Promise.all(promises).then((results) => {
-     
       console.log('images uploaded');
-     return results.map((file) => {
-        return bucketUrl + file;
+      return results.map((file) => {
+        return file;
       });
-
-     
-
-
     });
-
-
-  
-
-
 
     const location = {
       type: 'Point',
@@ -84,7 +32,7 @@ export const createEntry = async (req, res, next) => {
     const newEntry = new Entry({
       location,
       types,
-      imageUrls: imageSavedUrls || null ,
+      imageUrls: imageSavedUrls || null,
       author: req.user.id,
       yacht: req.user.yacht,
     });
@@ -93,18 +41,18 @@ export const createEntry = async (req, res, next) => {
 
     await newEntry.save();
 
-      const yachtToUpdate = await Yacht.findById(newEntry.yacht);
+    const yachtToUpdate = await Yacht.findById(newEntry.yacht);
 
-      await yachtToUpdate.entries.push(newEntry);
+    await yachtToUpdate.entries.push(newEntry);
 
-      await yachtToUpdate.save();
+    await yachtToUpdate.save();
 
-      const userToUpdate = await User.findOneAndUpdate(
-        { _id: req.user._id },
-        { $push: { entries: newEntry._id } }
-      );
-      await userToUpdate.save();
-      res.status(200).send(newEntry);
+    const userToUpdate = await User.findOneAndUpdate(
+      { _id: req.user._id },
+      { $push: { entries: newEntry._id } }
+    );
+    await userToUpdate.save();
+    res.status(200).send(newEntry);
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);
@@ -170,35 +118,3 @@ export const deleteEntry = async (req, res, next) => {
     console.log(error.message);
   }
 };
-
-// export const populateEntries = async (req, res, next) => {
-//   try {
-//     let doc = await Yacht.findOneAndUpdate(
-//       { yachtUniqueName: 'HugoBEL' },
-//       {
-//         invitedUsers: [
-//           { email: 'userb@gmail.com', name: 'userB' },
-//           { email: 'a@a.com', name: 'ju' },
-//           { email: 'b@b.com', name: 'ju' },
-//           { email: 'c@c.com', name: 'ju' },
-//           { email: 'd@d.com', name: 'ju' },
-//           { email: 'e@e.com', name: 'ju' },
-//           { email: 'jf@jf.com', name: 'ju' },
-//           { email: 'jm@jm.com', name: 'ju' },
-//           { email: 'f@f.com', name: 'ju' },
-//           { email: 'g@g.com', name: 'ju' },
-//           { email: 'jh@jh.com', name: 'ju' },
-//           { email: 'h@h.com', name: 'ju' },
-//         ],
-//       },
-//       {
-//         new: true,
-//       }
-//     );
-
-//     res.status(200).send(doc);
-//   } catch (error) {
-//     res.status(500).send('Server Error');
-//     console.log(error.message);
-//   }
-// };

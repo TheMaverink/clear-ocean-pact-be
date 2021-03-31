@@ -1,24 +1,18 @@
 import jwt from 'jsonwebtoken';
+import uploadToS3 from '@utils/uploadToS3';
 import dotenv from 'dotenv';
-const AWS = require('aws-sdk');
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY,
-  region: process.env.BUCKET_REGION,
-});
-// import S3 from 'aws-sdk/clients/s3';
-dotenv.config({ path: '.env' });
-
-let nodeEnv = process.env.NODE_ENV;
-
-import express from 'express';
 import bcrypt from 'bcrypt';
 import User from '@models/User';
 import Yacht from '@models/Yacht';
+
 var mailgun = require('mailgun-js')({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: process.env.MAILGUN_DOMAIN,
 });
+
+dotenv.config({ path: '.env' });
+
+let nodeEnv = process.env.NODE_ENV;
 
 export const inviteUsers = async (req, res, next) => {
   try {
@@ -88,8 +82,6 @@ export const getCurrentUser = async (req, res, next) => {
 
     // const currentUser = await User.findById(req.user.id)
 
-    console.log('from getCurrentUser');
-    console.log(currentUser);
     res.json(currentUser);
   } catch (error) {
     res.status(500).send('Server Error');
@@ -186,45 +178,11 @@ export const updateUser = async (req, res, next) => {
     (item) => item !== 'token' && item !== 'yachtUniqueName'
   );
 
-  console.log(updates);
-
-  console.log(req.body.isPrivateProfile);
-
   try {
     if (req.file) {
-      const bucketUrl =
-        'https://' +
-        process.env.BUCKET_NAME +
-        '.s3.' +
-        process.env.BUCKET_REGION +
-        '.amazonaws.com/';
-
       let profileImage = null;
-      function uploadFile(buffer, fileName) {
-        return new Promise((resolve, reject) => {
-          s3.upload(
-            {
-              Body: buffer,
-              Key: fileName,
-              Bucket: process.env.BUCKET_NAME,
-              ContentType: 'image/jpeg',
-            },
-            (error) => {
-              if (error) {
-                reject(error);
-              } else {
-                console.info(fileName);
-                resolve(fileName);
-              }
-            }
-          );
-        });
-      }
 
-      profileImage = await uploadFile(
-        req.file.buffer,
-        Date.now().toString()
-      ).then((result) => bucketUrl + result);
+      profileImage = await uploadToS3(req.file.buffer).then((result) => result);
 
       req.user['profileImage'] = profileImage;
     }
@@ -264,43 +222,11 @@ export const updateUser = async (req, res, next) => {
 
 export const updateAdmin = async (req, res, next) => {
   const updates = Object.keys(req.body).filter((item) => item !== 'token');
-  console.log('updates');
-  console.log(updates);
-  const bucketUrl =
-    'https://' +
-    process.env.BUCKET_NAME +
-    '.s3.' +
-    process.env.BUCKET_REGION +
-    '.amazonaws.com/';
 
   let profileImage;
   try {
     if (req.file) {
-      function uploadFile(buffer, fileName) {
-        return new Promise((resolve, reject) => {
-          s3.upload(
-            {
-              Body: buffer,
-              Key: fileName,
-              Bucket: process.env.BUCKET_NAME,
-              ContentType: 'image/jpeg',
-            },
-            (error) => {
-              if (error) {
-                reject(error);
-              } else {
-                console.info(fileName);
-                resolve(fileName);
-              }
-            }
-          );
-        });
-      }
-
-      profileImage = await uploadFile(
-        req.file.buffer,
-        Date.now().toString()
-      ).then((result) => bucketUrl + result);
+      profileImage = await uploadToS3(req.file.buffer).then((result) => result);
 
       req.user['profileImage'] = profileImage;
     }
@@ -358,8 +284,6 @@ export const loginUser = async (req, res, next) => {
     }
 
     const token = await user.generateJwtToken();
-
-    console.log(token);
 
     res.status(200).send({ user: user.getPublicProfile(), token });
   } catch (error) {
@@ -454,39 +378,9 @@ export const joinYacht = async (req, res, next) => {
     );
 
     if (req.file) {
-      const bucketUrl =
-        'https://' +
-        process.env.BUCKET_NAME +
-        '.s3.' +
-        process.env.BUCKET_REGION +
-        '.amazonaws.com/';
-
       let profileImage = null;
-      function uploadFile(buffer, fileName) {
-        return new Promise((resolve, reject) => {
-          s3.upload(
-            {
-              Body: buffer,
-              Key: fileName,
-              Bucket: process.env.BUCKET_NAME,
-              ContentType: 'image/jpeg',
-            },
-            (error) => {
-              if (error) {
-                reject(error);
-              } else {
-                console.info(fileName);
-                resolve(fileName);
-              }
-            }
-          );
-        });
-      }
 
-      profileImage = await uploadFile(
-        req.file.buffer,
-        Date.now().toString()
-      ).then((result) => bucketUrl + result);
+      profileImage = await uploadToS3(req.file.buffer).then((result) => result);
 
       req.user['profileImage'] = profileImage;
     }
