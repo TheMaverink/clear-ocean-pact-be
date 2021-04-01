@@ -13,6 +13,9 @@ export const createYacht = async (req, res, next) => {
   const { user } = req;
   const yachtUniqueName = yachtName.replace(/\s/g, '') + flag;
 
+  console.log('req.body');
+  console.log(req.body);
+
   try {
     let yacht = await Yacht.findOne({ yachtUniqueName });
 
@@ -137,37 +140,42 @@ export const updateYacht = async (req, res, next) => {
 
     const currentUserYacht = await Yacht.findById(req.body.yachtId);
 
-    try {
-      if (req.file) {
-        let yachtImage = null;
+    console.log('updates');
+    console.log(updates);
+    console.log('currentUserYacht');
+    console.log(currentUserYacht);
 
-        yachtImage = await uploadToS3(req.file.buffer).then((result) => result);
+    if (req.file) {
+      let yachtImage = null;
 
-        currentUserYacht['yachtImage'] = yachtImage;
-      }
+      yachtImage = await uploadToS3(req.file.buffer).then((result) => result);
 
-      const allowedUpdates = ['yachtImage', 'isPrivateProfile'];
-
-      const updateAllowed = updates.every((update) =>
-        allowedUpdates.includes(update)
-      );
-
-      if (!updateAllowed) {
-        console.log('invalid updates');
-        return res.status(400).send({ error: 'Invalid updates!' });
-      }
-      updates.forEach(
-        (update) => (currentUserYacht[update] = req.body[update])
-      );
-
-      await currentUserYacht.save();
-
-      res.status(200).send(req.user);
-    } catch (error) {
-      console.log('error from catch backend');
-      console.log(error);
-      res.status(400).send(error);
+      currentUserYacht['yachtImage'] = yachtImage;
     }
+
+    const allowedUpdates = [
+      'yachtImage',
+      'isPrivateProfile',
+      'officialNumber',
+    ];
+
+    const updateAllowed = updates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!updateAllowed) {
+      console.log('invalid updates');
+      return res.status(400).send({ error: 'Invalid updates!' });
+    }
+    updates.forEach((update) => {
+      console.log('update');
+      console.log(update);
+      return (currentUserYacht[update] = req.body[update]);
+    });
+
+    await currentUserYacht.save();
+
+    res.status(200).send(req.user);
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);
