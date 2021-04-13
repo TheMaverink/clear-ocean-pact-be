@@ -127,7 +127,7 @@ export const registerUser = async (req, res, next) => {
       <h1>Welcome ${firstName}</h1>
       <h2>Please click on the given link to activate your account</h2>
 
-      <a href="${baseUrl}/api/users/verify/${token}">This is a regular link</a>
+      <a href="${process.env.PROD_BASE_URL}/api/users/verify/${token}">This is a regular link</a>
 
      
       `,
@@ -165,6 +165,7 @@ export const verifyUser = async (req, res, next) => {
         }
       }
     );
+    res.status(200).send('<h1>thanks for confirming</h1>');
   } catch (error) {
     console.log(error);
   }
