@@ -6,6 +6,9 @@ import uploadToS3 from '@utils/uploadToS3';
 
 dotenv.config({ path: '.env' });
 
+
+
+
 export const createYacht = async (req, res, next) => {
   const { yachtName, flag, officialNumber, token } = req.body;
   let yachtImageUrl;
