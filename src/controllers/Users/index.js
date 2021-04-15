@@ -6,9 +6,11 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import User from '@models/User';
 import Yacht from '@models/Yacht';
+import confirmationRedirect from '@resources/pages/confirmationRedirect'
 
 // import nodeMailerTransporter from '@utils/nodeMailerTransporter';
 import confirmUser from '@resources/emails/confirmUser';
+import inviteUser from '@resources/emails/inviteUser';
 
 const auth = {
   auth: {
@@ -85,6 +87,9 @@ export const inviteUsers = async (req, res, next) => {
     const yachtId = req.user.yacht;
     const { invitedEmail, invitedFirstName, invitedLastName } = req.body;
 
+    console.log(invitedFirstName)
+    console.log(invitedLastName)
+
     const adminName = `${req.user.firstName} ${req.user.lastName}`;
 
     const currentYacht = await Yacht.findById(yachtId);
@@ -99,9 +104,6 @@ export const inviteUsers = async (req, res, next) => {
       invitedLastName: invitedLastName,
     });
     await currentYacht.save();
-
-    
-
 
 
     let mailOptions = {
@@ -119,24 +121,6 @@ export const inviteUsers = async (req, res, next) => {
       }
     });
 
-    // var data = {
-    //   from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
-    //   to: `${invitedEmail}`,
-    //   subject: 'Invite',
-    //   text: `hi ${invitedFirstName} Please help us confirm your account for Clear Ocean Project`,
-    //   html: `<h1>${adminName} invited you to join the yacht with the unique name ${yachtUniqueName} </h1>
-    //   <h2>Please download the app, create an account and join his yacht</h2>
-
-    //   `,
-    // };
-
-    // mailgun.messages().send(data, function (error, body) {
-    //   if (error) {
-    //     console.log(error);
-    //   }
-    //   console.log('Email was sent');
-    //   console.log(body);
-    // });
 
     res.json(currentYacht);
   } catch (error) {
@@ -192,7 +176,9 @@ export const verifyUser = async (req, res, next) => {
         }
       }
     );
-    res.status(200).send('<h1>thanks for confirming</h1>');
+
+    const confirmationRedirectPage = confirmationRedirect()
+    res.status(200).send(confirmationRedirectPage);
   } catch (error) {
     console.log(error);
   }
@@ -252,6 +238,8 @@ export const updateUser = async (req, res, next) => {
 
 export const updateAdmin = async (req, res, next) => {
   const updates = Object.keys(req.body).filter((item) => item !== 'token');
+
+  console.log(req.body)
 
   let profileImage;
   try {

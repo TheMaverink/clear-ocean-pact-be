@@ -1,4 +1,4 @@
-const inviteUser = (invitedFirstName, adminName, yachtUniqueName, yachtName)=>{
+const confirmationRedirect = ()=>{
   return `<!doctype html>
   <html>
     <head>
@@ -352,25 +352,10 @@ const inviteUser = (invitedFirstName, adminName, yachtUniqueName, yachtName)=>{
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                       <tr>
                         <td>
-                          <p>Hi ${invitedFirstName},</p>
-                          <p>You have just been invited by ${adminName} to join the yacht ${yachtName}!</p>
-                          <p>The yacht unique name is ${yachtUniqueName}</p>
-                          <p>Please download the app and make an account with this email and help us make a difference!.</p>
-                     
-                          <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
-                            <tbody>
-                              <tr>
-                                <td align="left">
-                                  <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                 
-                                  </table>
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
-                      
-                          <p>Please do not reply to this email.</p>
-                         
+                    
+                          <p>Thanks for confirming</p>
+                        
+     
                         </td>
                       </tr>
                     </table>
@@ -404,4 +389,4 @@ const inviteUser = (invitedFirstName, adminName, yachtUniqueName, yachtName)=>{
   </html>`
 }
 
-export default inviteUser
+export default confirmationRedirect
