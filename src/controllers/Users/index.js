@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import User from '@models/User';
 import Yacht from '@models/Yacht';
 
-import nodeMailerTransporter from 'utils/nodeMailerTransporter';
+import nodeMailerTransporter from '@utils/nodeMailerTransporter';
 import confirmUser from '@resources/emails/confirmUser';
 
 var mailgun = require('mailgun-js')({
