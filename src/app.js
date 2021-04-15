@@ -1,6 +1,7 @@
 import '@babel/polyfill';
 import 'module-alias/register';
 
+import path from 'path'
 import http from 'http';
 import express from 'express';
 import expressStatusMonitor from 'express-status-monitor';
@@ -9,6 +10,7 @@ import bodyParser from 'body-parser';
 import chalk from 'chalk';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
+import hbs from 'express-handlebars'
 import cors from 'cors';
 import logger from './utils/logger';
 import errorHandler from 'errorhandler';
@@ -24,8 +26,6 @@ const httpServer = http.Server(app);
 
 let nodeEnv = process.env.NODE_ENV;
 let mongoUri;
-
-
 
 mongoose.set('useUnifiedTopology', true);
 mongoose.set('useFindAndModify', false);
@@ -57,6 +57,12 @@ const connectDb = () => {
   return mongoose.connect(mongoUri);
 };
 
+//HANDLEBARS CONFIG
+
+// app.engine('hbs', hbs({extname: 'hbs', defaultLayout: 'layout', layoutsDir: __dirname + '/views/layouts/'}));
+// app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'hbs');
+
 // EXPRESS CONFIG
 app.set('host', process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0');
 app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080);
@@ -67,6 +73,7 @@ app.use(
     extended: true,
   })
 );
+
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(check());

@@ -5,6 +5,9 @@ import bcrypt from 'bcrypt';
 import User from '@models/User';
 import Yacht from '@models/Yacht';
 
+import nodeMailerTransporter from 'utils/nodeMailerTransporter';
+import confirmUser from '@resources/emails/confirmUser';
+
 var mailgun = require('mailgun-js')({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: process.env.MAILGUN_DOMAIN,
@@ -12,7 +15,59 @@ var mailgun = require('mailgun-js')({
 
 dotenv.config({ path: '.env' });
 
-let nodeEnv = process.env.NODE_ENV;
+// let nodeEnv = process.env.NODE_ENV;
+
+    // const baseUrl =
+    //   nodeEnv === 'development'
+    //     ? process.env.DEV_BASE_URL
+    //     : process.env.PROD_BASE_URL;
+
+export const registerUser = async (req, res, next) => {
+  const { firstName, lastName, email, password } = req.body;
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (user) {
+      return res.status(400).json({
+        msg: 'Sorry, there is a user already registered with this email!',
+      });
+    }
+
+    user = new User({
+      email,
+      firstName,
+      lastName,
+      password,
+    });
+
+    await user.save();
+
+    const token = await user.generateJwtToken();
+
+    const confirmLink = `${process.env.PROD_BASE_URL}/api/users/verify/${token}`;
+
+    let mailOptions = {
+      from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
+      to: `${email}`,
+      subject: 'Email Verification',
+      html: confirmUser(firstName, confirmLink),
+    };
+
+    nodeMailerTransporter.sendMail(mailOptions, function (err, data) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('message sent');
+      }
+    });
+
+    res.status(200).send({ user: user.getPublicProfile(), token });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
 
 export const inviteUsers = async (req, res, next) => {
   try {
@@ -25,6 +80,8 @@ export const inviteUsers = async (req, res, next) => {
 
     const yachtUniqueName = currentYacht.yachtUniqueName;
 
+    const yachtName = currentYacht.name;
+
     await currentYacht.invitedUsers.push({
       email: invitedEmail.toLowerCase(),
       invitedFirstName: invitedFirstName,
@@ -32,24 +89,43 @@ export const inviteUsers = async (req, res, next) => {
     });
     await currentYacht.save();
 
-    var data = {
+    
+
+
+
+    let mailOptions = {
       from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
       to: `${invitedEmail}`,
-      subject: 'Invite',
-      text: `hi ${invitedFirstName} Please help us confirm your account for Clear Ocean Project`,
-      html: `<h1>${adminName} invited you to join the yacht with the unique name ${yachtUniqueName} </h1>
-      <h2>Please download the app, create an account and join his yacht</h2>
-
-      `,
+      subject: 'You have been invited!',
+      html: inviteUser(invitedFirstName, adminName, yachtUniqueName, yachtName),
     };
 
-    mailgun.messages().send(data, function (error, body) {
-      if (error) {
-        console.log(error);
+    nodeMailerTransporter.sendMail(mailOptions, function (err, data) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('message sent');
       }
-      console.log('Email was sent');
-      console.log(body);
     });
+
+    // var data = {
+    //   from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
+    //   to: `${invitedEmail}`,
+    //   subject: 'Invite',
+    //   text: `hi ${invitedFirstName} Please help us confirm your account for Clear Ocean Project`,
+    //   html: `<h1>${adminName} invited you to join the yacht with the unique name ${yachtUniqueName} </h1>
+    //   <h2>Please download the app, create an account and join his yacht</h2>
+
+    //   `,
+    // };
+
+    // mailgun.messages().send(data, function (error, body) {
+    //   if (error) {
+    //     console.log(error);
+    //   }
+    //   console.log('Email was sent');
+    //   console.log(body);
+    // });
 
     res.json(currentYacht);
   } catch (error) {
@@ -89,66 +165,6 @@ export const getCurrentUser = async (req, res, next) => {
   }
 };
 
-export const registerUser = async (req, res, next) => {
-  const { firstName, lastName, email, password } = req.body;
-
-  try {
-    let user = await User.findOne({ email });
-
-    if (user) {
-      return res.status(400).json({
-        msg: 'Sorry, there is a user already registered with this email!',
-      });
-    }
-
-    user = new User({
-      email,
-      firstName,
-      lastName,
-      password,
-    });
-
-    await user.save();
-
-    const token = await user.generateJwtToken();
-
-    const baseUrl =
-      nodeEnv === 'development'
-        ? process.env.DEV_BASE_URL
-        : process.env.PROD_BASE_URL;
-
-    var data = {
-      from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
-      to: `${email}`,
-      subject: 'Email Verification',
-      text: 'Please help us confirm your account for Clear Ocean Project',
-      html: `
-     
-      <h1>Welcome ${firstName}</h1>
-      <h2>Please click on the given link to activate your account</h2>
-
-      <a href="${process.env.PROD_BASE_URL}/api/users/verify/${token}">This is a regular link</a>
-
-     
-      `,
-    };
-
-    mailgun.messages().send(data, function (error, body) {
-      if (error) {
-        console.log(error);
-      }
-      console.log('Email was sent');
-      console.log(body);
-    });
-
-    // res.status(200).send({ vessel, token });
-    res.status(200).send({ user: user.getPublicProfile(), token });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).send('Server error');
-  }
-};
-
 export const verifyUser = async (req, res, next) => {
   try {
     const decodedId = Object.values(
@@ -183,7 +199,9 @@ export const updateUser = async (req, res, next) => {
     if (req.file) {
       let profileImage = null;
 
-      profileImage = await uploadToS3(req.file.buffer).then((result) => result);
+      profileImage = await uploadToS3(req.file.buffer, 'user-images/').then(
+        (result) => result
+      );
 
       req.user['profileImage'] = profileImage;
     }
@@ -227,7 +245,9 @@ export const updateAdmin = async (req, res, next) => {
   let profileImage;
   try {
     if (req.file) {
-      profileImage = await uploadToS3(req.file.buffer).then((result) => result);
+      profileImage = await uploadToS3(req.file.buffer, 'user-images/').then(
+        (result) => result
+      );
 
       req.user['profileImage'] = profileImage;
     }
@@ -381,7 +401,9 @@ export const joinYacht = async (req, res, next) => {
     if (req.file) {
       let profileImage = null;
 
-      profileImage = await uploadToS3(req.file.buffer).then((result) => result);
+      profileImage = await uploadToS3(req.file.buffer, 'user-images/').then(
+        (result) => result
+      );
 
       req.user['profileImage'] = profileImage;
     }

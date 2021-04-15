@@ -44,7 +44,7 @@ export const createYacht = async (req, res, next) => {
     if (req.file) {
       console.log('is gona upload yacht img');
 
-      yachtImageUrl = await uploadToS3(req.file.buffer).then(
+      yachtImageUrl = await uploadToS3(req.file.buffer, "yacht-images/").then(
         (result) => result
       );
     }
@@ -148,7 +148,7 @@ export const updateYacht = async (req, res, next) => {
     if (req.file) {
       let yachtImage = null;
 
-      yachtImage = await uploadToS3(req.file.buffer).then((result) => result);
+      yachtImage = await uploadToS3(req.file.buffer, "yacht-images/").then((result) => result);
 
       currentUserYacht['yachtImage'] = yachtImage;
     }

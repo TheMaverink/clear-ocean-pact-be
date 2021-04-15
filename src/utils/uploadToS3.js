@@ -10,7 +10,7 @@ const s3 = new S3({
   // signatureVersion: 'v4',
 });
 
-const uploadToS3 = (buffer) => {
+const uploadToS3 = (buffer, filePath) => {
   const bucketUrl =
     'https://' +
     process.env.BUCKET_NAME +
@@ -19,13 +19,17 @@ const uploadToS3 = (buffer) => {
     '.amazonaws.com/';
 
   return new Promise((resolve, reject) => {
+    const timestamp = Date.now().toString();
 
-    const timestamp = Date.now().toString()
+    let bucketPath = filePath + timestamp;
+
+    console.log(bucketPath);
     s3.upload(
       {
         Body: buffer,
-        Key: timestamp,
+        // Key: timestamp,
         Bucket: process.env.BUCKET_NAME,
+        Key: bucketPath,
         ContentType: 'image/jpeg',
       },
       (error) => {
@@ -34,7 +38,8 @@ const uploadToS3 = (buffer) => {
           reject(error);
         } else {
           console.info(bucketUrl + timestamp);
-          resolve(bucketUrl + timestamp);
+          resolve(process.env.BUCKET_NAME + bucketPath);
+         
         }
       }
     );

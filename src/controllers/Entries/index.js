@@ -14,7 +14,7 @@ export const createEntry = async (req, res, next) => {
     const promises = [];
 
     req.files.forEach((file) => {
-      promises.push(uploadToS3(file.buffer).then((result) => result));
+      promises.push(uploadToS3(file.buffer, "entry-images/").then((result) => result));
     });
 
     const imageSavedUrls = await Promise.all(promises).then((results) => {
