@@ -1,12 +1,23 @@
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+import nodemailerMailgun from 'nodemailer-mailgun-transport';
 import uploadToS3 from '@utils/uploadToS3';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import User from '@models/User';
 import Yacht from '@models/Yacht';
 
-import nodeMailerTransporter from '@utils/nodeMailerTransporter';
+// import nodeMailerTransporter from '@utils/nodeMailerTransporter';
 import confirmUser from '@resources/emails/confirmUser';
+
+const auth = {
+  auth: {
+    api_key: process.env.MAILGUN_API_KEY,
+    domain: process.env.MAILGUN_DOMAIN,
+  },
+};
+
+let nodeMailerTransporter = nodemailer.createTransport(nodemailerMailgun(auth));
 
 var mailgun = require('mailgun-js')({
   apiKey: process.env.MAILGUN_API_KEY,
