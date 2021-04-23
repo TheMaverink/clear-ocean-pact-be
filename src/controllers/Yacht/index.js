@@ -6,10 +6,9 @@ import uploadToS3 from '@utils/uploadToS3';
 
 dotenv.config({ path: '.env' });
 
-export const deleteCurrentYacht = async(req,res,next)=>{
-  console.log('yeah')
-}
-
+export const deleteCurrentYacht = async (req, res, next) => {
+  console.log('yeah');
+};
 
 export const createYacht = async (req, res, next) => {
   const { yachtName, flag, officialNumber, token } = req.body;
@@ -49,7 +48,7 @@ export const createYacht = async (req, res, next) => {
     if (req.file) {
       console.log('is gona upload yacht img');
 
-      yachtImageUrl = await uploadToS3(req.file.buffer, "yacht-images/").then(
+      yachtImageUrl = await uploadToS3(req.file.buffer, 'yacht-images/').then(
         (result) => result
       );
     }
@@ -135,6 +134,22 @@ export const getCurrentYacht = async (req, res, next) => {
   }
 };
 
+export const getYachtUsers = async (req, res, next) => {
+  try {
+    const currentUserYacht = await Yacht.findById(req.user.yacht).populate(
+      'users'
+    );
+
+    const yachtUsers = await currentUserYacht.users;
+    console.log('yachtUsers');
+    console.log(yachtUsers);
+    res.json(yachtUsers);
+  } catch (error) {
+    res.status(500).send('Server Error');
+    console.log(error.message);
+  }
+};
+
 export const updateYacht = async (req, res, next) => {
   try {
     // const currentUserYacht = await Yacht.findById(req.user.yacht);
@@ -153,16 +168,14 @@ export const updateYacht = async (req, res, next) => {
     if (req.file) {
       let yachtImage = null;
 
-      yachtImage = await uploadToS3(req.file.buffer, "yacht-images/").then((result) => result);
+      yachtImage = await uploadToS3(req.file.buffer, 'yacht-images/').then(
+        (result) => result
+      );
 
       currentUserYacht['yachtImage'] = yachtImage;
     }
 
-    const allowedUpdates = [
-      'yachtImage',
-      'isPrivateProfile',
-      'officialNumber',
-    ];
+    const allowedUpdates = ['yachtImage', 'isPrivateProfile', 'officialNumber'];
 
     const updateAllowed = updates.every((update) =>
       allowedUpdates.includes(update)

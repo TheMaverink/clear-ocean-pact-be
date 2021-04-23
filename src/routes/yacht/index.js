@@ -9,7 +9,8 @@ import {
   // getYacht,
   getCurrentYacht,
   updateYacht,
-  deleteCurrentYacht
+  deleteCurrentYacht,
+  getYachtUsers
 } from '@controllers/Yacht';
 var multer = require('multer');
 var upload = multer({
@@ -19,8 +20,10 @@ var type = upload.single('yachtPhoto');
 
 const router = Router();
 
+
 router.get('/current', auth, getCurrentYacht);
 router.delete('/current', auth, deleteCurrentYacht);
+router.get('/users', auth, getYachtUsers);
 // router.get('/edit/:token', auth, editYacht);
 router.post('/new', auth, type, createYacht);
 router.get('/populate', populateInvites);

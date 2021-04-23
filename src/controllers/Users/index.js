@@ -108,9 +108,6 @@ export const inviteUsers = async (req, res, next) => {
     const yachtId = req.user.yacht;
     const { invitedEmail, invitedFirstName, invitedLastName } = req.body;
 
-    console.log(invitedFirstName);
-    console.log(invitedLastName);
-
     const adminName = `${req.user.firstName} ${req.user.lastName}`;
 
     const currentYacht = await Yacht.findById(yachtId);
@@ -167,9 +164,6 @@ export const getCurrentUser = async (req, res, next) => {
     const currentUser = await User.findById(req.user.id)
       .select('-tokens -password')
       .populate('yacht');
-
-    console.log('currentUser@!!!');
-    console.log(currentUser);
 
     // const currentUser = await User.findById(req.user.id).populate('yacht');
 
@@ -340,8 +334,6 @@ export const getAllUsers = async (req, res, next) => {
       {},
       'firstName lastName email isAdmin role position entries settings yacht profileImage isEmailVerified isPrivateProfile'
     ).populate('entries');
-
-    console.log(allUsers);
 
     res.json(allUsers);
   } catch (error) {
