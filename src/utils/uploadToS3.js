@@ -10,7 +10,7 @@ const s3 = new S3({
   // signatureVersion: 'v4',
 });
 
-const uploadToS3 = (buffer, filePath) => {
+const uploadToS3 = (buffer, filePath) => { //try multipart
   const bucketUrl =
     'https://' +
     process.env.BUCKET_NAME +
@@ -23,7 +23,6 @@ const uploadToS3 = (buffer, filePath) => {
 
     let bucketPath = filePath + timestamp;
 
-    console.log(bucketPath);
     s3.upload(
       {
         Body: buffer,
@@ -37,9 +36,8 @@ const uploadToS3 = (buffer, filePath) => {
           console.log(error);
           reject(error);
         } else {
-          console.info(bucketUrl + timestamp);
-          resolve(process.env.BUCKET_NAME + bucketPath);
-         
+          const fullUrl = `${bucketUrl}${filePath}${timestamp}`;
+          resolve(fullUrl);
         }
       }
     );

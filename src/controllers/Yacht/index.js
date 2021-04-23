@@ -6,7 +6,9 @@ import uploadToS3 from '@utils/uploadToS3';
 
 dotenv.config({ path: '.env' });
 
-
+export const deleteCurrentYacht = async(req,res,next)=>{
+  console.log('yeah')
+}
 
 
 export const createYacht = async (req, res, next) => {

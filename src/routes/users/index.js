@@ -34,6 +34,7 @@ import {
   isUserInvited,
   getCurrentUser,
   inviteUsers,
+  deleteCurrentUser
 
 } from '@controllers/Users';
 
@@ -43,6 +44,7 @@ const router = Router();
 //ADD AUTH ROUTES
 router.get('/user/:id', getUser);
 router.get('/current', auth, getCurrentUser);
+router.delete('/current', auth, deleteCurrentUser);
 router.post('/register/user', userValidationRules(), validate, registerUser); //just use this from admin?
 router.get('/verify/:token', verifyUser);
 router.get('/isUserInvited', auth, isUserInvited);
@@ -54,7 +56,7 @@ router.post('/join-yacht', auth, joinYacht);
 router.get('/all', getAllUsers);
 router.post('/invite', auth,inviteUsers);
 
-router.delete('/:id', deleteUser);
+// router.delete('/:id', deleteUser);
 
 // router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
 

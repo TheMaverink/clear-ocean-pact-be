@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import User from '@models/User';
 import Yacht from '@models/Yacht';
-import confirmationRedirect from '@resources/pages/confirmationRedirect'
+import confirmationRedirect from '@resources/pages/confirmationRedirect';
 
 // import nodeMailerTransporter from '@utils/nodeMailerTransporter';
 import confirmUser from '@resources/emails/confirmUser';
@@ -30,10 +30,31 @@ dotenv.config({ path: '.env' });
 
 // let nodeEnv = process.env.NODE_ENV;
 
-    // const baseUrl =
-    //   nodeEnv === 'development'
-    //     ? process.env.DEV_BASE_URL
-    //     : process.env.PROD_BASE_URL;
+// const baseUrl =
+//   nodeEnv === 'development'
+//     ? process.env.DEV_BASE_URL
+//     : process.env.PROD_BASE_URL;
+
+export const deleteCurrentUser = async (req, res, next) => {
+  const yachtWithThisAdmin = await Yacht.find({ admin: req.user._id });
+
+  if (!yachtWithThisAdmin) {
+    return res.status(400).json({
+      msg: 'Sorry, there is no yacht associated with this suser',
+    });
+  }
+
+  const yachtWithThisAdminUsers = await yachtWithThisAdmin[0].users;
+
+  let promises = yachtWithThisAdminUsers.map((id) =>
+    User.findByIdAndRemove(id)
+  );
+  Promise.all(promises);
+
+  await Yacht.findByIdAndRemove(yachtWithThisAdmin[0].id);
+
+  res.status(200).send({ msg: 'users deleted' });
+};
 
 export const registerUser = async (req, res, next) => {
   const { firstName, lastName, email, password } = req.body;
@@ -87,8 +108,8 @@ export const inviteUsers = async (req, res, next) => {
     const yachtId = req.user.yacht;
     const { invitedEmail, invitedFirstName, invitedLastName } = req.body;
 
-    console.log(invitedFirstName)
-    console.log(invitedLastName)
+    console.log(invitedFirstName);
+    console.log(invitedLastName);
 
     const adminName = `${req.user.firstName} ${req.user.lastName}`;
 
@@ -105,7 +126,6 @@ export const inviteUsers = async (req, res, next) => {
     });
     await currentYacht.save();
 
-
     let mailOptions = {
       from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
       to: `${invitedEmail}`,
@@ -121,7 +141,6 @@ export const inviteUsers = async (req, res, next) => {
       }
     });
 
-
     res.json(currentYacht);
   } catch (error) {
     res.status(500).send('Server Error');
@@ -133,7 +152,7 @@ export const getUser = async (req, res, next) => {
   try {
     const specificUser = await User.findById(
       req.params.id,
-      'firstName lastName email isAdmin position entries settings'
+      'firstName lastName email isAdmin position entries settings profileImage'
     );
 
     res.json(specificUser);
@@ -148,6 +167,9 @@ export const getCurrentUser = async (req, res, next) => {
     const currentUser = await User.findById(req.user.id)
       .select('-tokens -password')
       .populate('yacht');
+
+    console.log('currentUser@!!!');
+    console.log(currentUser);
 
     // const currentUser = await User.findById(req.user.id).populate('yacht');
 
@@ -177,7 +199,7 @@ export const verifyUser = async (req, res, next) => {
       }
     );
 
-    const confirmationRedirectPage = confirmationRedirect()
+    const confirmationRedirectPage = confirmationRedirect();
     res.status(200).send(confirmationRedirectPage);
   } catch (error) {
     console.log(error);
@@ -239,7 +261,7 @@ export const updateUser = async (req, res, next) => {
 export const updateAdmin = async (req, res, next) => {
   const updates = Object.keys(req.body).filter((item) => item !== 'token');
 
-  console.log(req.body)
+  console.log(req.body);
 
   let profileImage;
   try {

@@ -14,7 +14,9 @@ export const createEntry = async (req, res, next) => {
     const promises = [];
 
     req.files.forEach((file) => {
-      promises.push(uploadToS3(file.buffer, "entry-images/").then((result) => result));
+      promises.push(
+        uploadToS3(file.buffer, 'entry-images/').then((result) => result)
+      );
     });
 
     const imageSavedUrls = await Promise.all(promises).then((results) => {
@@ -62,7 +64,7 @@ export const createEntry = async (req, res, next) => {
 export const getAllGlobalEntries = async (req, res, next) => {
   try {
     const globalEntries = await Entry.find({}).populate(
-      'author',
+      'author yacht',
       '-tokens -password'
     );
 
@@ -78,7 +80,7 @@ export const getAllYachtEntries = async (req, res, next) => {
     const yachtId = req.user.yacht;
 
     const yachtEntries = await Entry.find({ yacht: yachtId }).populate(
-      'author',
+      'author yacht',
       '-tokens -password'
     );
 
