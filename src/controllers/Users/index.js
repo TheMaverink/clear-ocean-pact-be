@@ -201,12 +201,17 @@ export const verifyUser = async (req, res, next) => {
 };
 
 export const updateUser = async (req, res, next) => {
+  console.log('UPDATE USER CONTROLLER CALLED')
   const currentUserYacht = await Yacht.findById(req.user.yacht);
   const { yachtUniqueName } = currentUserYacht;
+ 
 
   const updates = Object.keys(req.body).filter(
     (item) => item !== 'token' && item !== 'yachtUniqueName'
   );
+
+  console.log('updates!')
+  console.log(updates)
 
   try {
     if (req.file) {
@@ -216,10 +221,14 @@ export const updateUser = async (req, res, next) => {
         (result) => result
       );
 
-      req.user['profileImage'] = profileImage;
+     
+
+       req.user['profileImage'] = await profileImage;
     }
 
-    const allowedUpdates = ['position', 'profileImage', 'isPrivateProfile'];
+ 
+
+    const allowedUpdates = ['position', 'profileImage', 'isPrivateProfile', 'firstName', 'lastName'];
 
     const updateAllowed = updates.every((update) =>
       allowedUpdates.includes(update)
@@ -229,7 +238,7 @@ export const updateUser = async (req, res, next) => {
       console.log('invalid updates');
       return res.status(400).send({ error: 'Invalid updates!' });
     }
-    updates.forEach((update) => (req.user[update] = req.body[update]));
+    // updates.forEach((update) => (req.user[update] = req.body[update]));
 
     //IF NOT EXISTENT
     const yachtToUpdate = await Yacht.findOneAndUpdate(
@@ -237,10 +246,24 @@ export const updateUser = async (req, res, next) => {
       { $push: { users: req.user._id } }
     );
 
-    const userToUpdate = await User.findOneAndUpdate(
-      { _id: req.user.id },
-      { yacht: yachtToUpdate._id }
-    );
+    // const userToUpdate = await User.findOneAndUpdate(
+    //   { _id: req.user.id },
+    //   { yacht: yachtToUpdate._id }
+    // );
+
+    // const userToUpdate = await User.find(
+    //   { _id: req.user.id }
+    
+    // );
+
+    // const userToUpdate = await User.findById(req.user.id);
+
+
+
+    updates.forEach((update) => (req.user[update] = req.body[update]));
+
+    console.log('req.user')
+    console.log(req.user)
 
     await req.user.save();
 
@@ -253,9 +276,10 @@ export const updateUser = async (req, res, next) => {
 };
 
 export const updateAdmin = async (req, res, next) => {
+  console.log('UPDATE ADMIN CONTROLLER CALLED')
   const updates = Object.keys(req.body).filter((item) => item !== 'token');
 
-  console.log(req.body);
+
 
   let profileImage;
   try {
@@ -391,8 +415,7 @@ export const joinYacht = async (req, res, next) => {
       { $push: { users: req.user._id } }
     );
     // const currentYacht = await Yacht.find({ yachtUniqueName: yachtUniqueName });
-    console.log('currentYacht');
-    console.log(currentYacht);
+ 
 
     // const query = await Yacht.find({ 'invitedUsers.email': user.email });
 
