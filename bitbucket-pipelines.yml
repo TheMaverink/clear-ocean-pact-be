@@ -9,7 +9,7 @@ pipelines:
             - apt-get install -y zip # required for packaging up the application
             - npm install
             - npm run build
-            - zip -rq application.zip dist package.json .env.example .npmrc .ebextensions
+            - zip -rq application.zip dist package.json .env.example .npmrc .platform
           artifacts:
             - application.zip
 
