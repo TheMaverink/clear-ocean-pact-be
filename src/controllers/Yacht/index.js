@@ -136,9 +136,18 @@ export const getCurrentYacht = async (req, res, next) => {
 
 export const getYachtUsers = async (req, res, next) => {
   try {
-    const currentUserYacht = await Yacht.findById(req.user.yacht).populate(
-      'users'
-    );
+    // const currentUserYacht = await Yacht.findById(req.user.yacht).populate(
+    //   'users'
+    // );
+
+    const currentUserYacht = await Yacht.findById(req.user.yacht).populate({
+      path: 'users',
+      model: 'User',
+      populate: {
+        path: 'entries',
+        model: 'Entry',
+      },
+    });
 
     const yachtUsers = await currentUserYacht.users;
     console.log('yachtUsers');
