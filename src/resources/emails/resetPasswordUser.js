@@ -1,4 +1,4 @@
-const confirmUser = (name, confirmLink)=>{
+const inviteUser = (firstName, lastName, resetCode) => {
   return `<!doctype html>
   <html>
     <head>
@@ -335,7 +335,7 @@ const confirmUser = (name, confirmLink)=>{
       </style>
     </head>
     <body class="">
-      <span class="preheader">Please confirm your account to unlock all the features.</span>
+      <span class="preheader">Reset Password</span>
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
         <tr>
           <td>&nbsp;</td>
@@ -352,26 +352,21 @@ const confirmUser = (name, confirmLink)=>{
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                       <tr>
                         <td>
-                          <p>Hi ${name},</p>
-                          <p>Thanks for being part of the Clear Ocean Project - a citizen science project for the yachting industry in partnership with MYBA, the Clear Ocean Pact and Just One Ocean.</p>
-                          <p>Please click below to confirm your account.</p>
-                     
+                          <p>Hi ${firstName} ${lastName},</p>
+                          <p>Please enter the following code on the app to verify your account and change your password</p>
+                          <p>${resetCode}</p>
                           <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                             <tbody>
                               <tr>
                                 <td align="left">
                                   <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                    <tbody>
-                                      <tr>
-                                        <td> <a href=${confirmLink} target="_blank">Confirm account.</a> </td>
-                                      </tr>
-                                    </tbody>
+                                 
                                   </table>
                                 </td>
                               </tr>
                             </tbody>
                           </table>
-                          <p>Once confirmed, you will have full access to all Clear Ocean Project app features.</p>
+                      
                           <p>Please do not reply to this email.</p>
                          
                         </td>
@@ -404,7 +399,7 @@ const confirmUser = (name, confirmLink)=>{
         </tr>
       </table>
     </body>
-  </html>`
-}
+  </html>`;
+};
 
-export default confirmUser
+export default inviteUser;

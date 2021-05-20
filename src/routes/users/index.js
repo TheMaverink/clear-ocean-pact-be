@@ -25,7 +25,8 @@ import {
   registerUser,
   verifyUser,
   getUser,
-  updateUser,
+  updateCurrentUser,
+  updateOtherUser,
   updateAdmin,
   loginUser,
   getAllUsers,
@@ -34,8 +35,10 @@ import {
   isUserInvited,
   getCurrentUser,
   inviteUsers,
-  deleteCurrentUser
-
+  deleteCurrentUser,
+  resetPassword,
+  resetPasswordSendCode,
+  resetPasswordConfirmCode,
 } from '@controllers/Users';
 
 const router = Router();
@@ -48,13 +51,17 @@ router.delete('/current', auth, deleteCurrentUser);
 router.post('/register/user', userValidationRules(), validate, registerUser); //just use this from admin?
 router.get('/verify/:token', verifyUser);
 router.get('/isUserInvited', auth, isUserInvited);
-router.post('/updateUser', auth, userType, updateUser);
+router.post('/updateUser', auth, userType, updateCurrentUser);
+router.post('/updateOtherUser', auth, userType, updateOtherUser);
 router.post('/joinYacht', auth, userType, joinYacht);
 router.post('/updateAdmin', auth, type, updateAdmin);
 router.post('/login', userValidationRules(), validate, loginUser);
 router.post('/join-yacht', auth, joinYacht);
 router.get('/all', getAllUsers);
-router.post('/invite', auth,inviteUsers);
+router.post('/invite', auth, inviteUsers);
+router.post('/password-reset-send-code', resetPasswordSendCode);
+router.post('/password-reset-confirm-code', resetPasswordConfirmCode);
+router.post('/password-reset', resetPassword);
 
 // router.delete('/:id', deleteUser);
 

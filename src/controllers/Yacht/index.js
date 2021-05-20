@@ -15,10 +15,11 @@ export const createYacht = async (req, res, next) => {
   let yachtImageUrl;
   // console.log(yachtName+flag+officialNumber)
   const { user } = req;
-  const yachtUniqueName = yachtName.replace(/\s/g, '') + flag;
+  const yachtUniqueName =
+    yachtName.replace(/\s/g, '') + flag.replace(/\s/g, '').toLowerCase();
 
-  console.log('req.body');
-  console.log(req.body);
+  console.log('yachtUniqueName');
+  console.log(yachtUniqueName);
 
   try {
     let yacht = await Yacht.findOne({ yachtUniqueName });
@@ -151,7 +152,7 @@ export const getYachtUsers = async (req, res, next) => {
 
     const yachtUsers = await currentUserYacht.users;
     console.log('yachtUsers');
-    console.log(yachtUsers);
+    console.log(yachtUsers.length);
     res.json(yachtUsers);
   } catch (error) {
     res.status(500).send('Server Error');

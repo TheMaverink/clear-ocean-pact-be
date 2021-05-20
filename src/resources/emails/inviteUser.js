@@ -1,4 +1,9 @@
-const inviteUser = (invitedFirstName, adminName, yachtUniqueName, yachtName)=>{
+const inviteUser = (
+  invitedFirstName,
+  adminName,
+  yachtUniqueName,
+  yachtName
+) => {
   return `<!doctype html>
   <html>
     <head>
@@ -353,10 +358,17 @@ const inviteUser = (invitedFirstName, adminName, yachtUniqueName, yachtName)=>{
                       <tr>
                         <td>
                           <p>Hi ${invitedFirstName},</p>
-                          <p>You have just been invited by ${adminName} to join the yacht ${yachtName}!</p>
-                          <p>The yacht unique name is ${yachtUniqueName}</p>
+                          <p>You have just been invited by ${adminName} to join the yacht ${yachtName}, to be part of the Clear Ocean Project - a citizen science project for the yachting industry
+                          in partnership with MYBA, the Clear Ocean Pact and Just One Ocean.</p>
+                          <p>The yacht ${yachtName} accounts unique name is: ${yachtUniqueName}</p>
                           <p>Please download the app and make an account with this email and help us make a difference!.</p>
-                     
+
+                          <p>To start using the app:</p>
+                          <p>1. Download the Clear Ocean Project app from the app store or google play</p>
+                          <p>2. Register your profile.</p>
+                          <p>3. Click join yacht using yacht unique name ${yachtUniqueName}.</p>
+                        
+                    
                           <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                             <tbody>
                               <tr>
@@ -401,7 +413,7 @@ const inviteUser = (invitedFirstName, adminName, yachtUniqueName, yachtName)=>{
         </tr>
       </table>
     </body>
-  </html>`
-}
+  </html>`;
+};
 
-export default inviteUser
+export default inviteUser;

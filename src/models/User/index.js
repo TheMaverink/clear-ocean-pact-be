@@ -63,6 +63,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    resetPasswordCode:{
+      type:String,
+      trim: true,
+    }
     // settings: {
     //   private: {
     //     type: Boolean,

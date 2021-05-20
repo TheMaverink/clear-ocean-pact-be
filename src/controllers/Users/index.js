@@ -4,6 +4,7 @@ import nodemailerMailgun from 'nodemailer-mailgun-transport';
 import uploadToS3 from '@utils/uploadToS3';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import seedrandom from 'seedrandom';
 import User from '@models/User';
 import Yacht from '@models/Yacht';
 import confirmationRedirect from '@resources/pages/confirmationRedirect';
@@ -11,6 +12,7 @@ import confirmationRedirect from '@resources/pages/confirmationRedirect';
 // import nodeMailerTransporter from '@utils/nodeMailerTransporter';
 import confirmUser from '@resources/emails/confirmUser';
 import inviteUser from '@resources/emails/inviteUser';
+import resetPasswordUser from '@resources/emails/resetPasswordUser';
 
 const auth = {
   auth: {
@@ -34,6 +36,99 @@ dotenv.config({ path: '.env' });
 //   nodeEnv === 'development'
 //     ? process.env.DEV_BASE_URL
 //     : process.env.PROD_BASE_URL;
+
+export const resetPasswordSendCode = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const resetCode = await new seedrandom()().toString().substring(3, 9);
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        msg: 'Sorry, there is no user registered with this email!',
+      });
+    }
+
+    user.resetPasswordCode = resetCode;
+
+    const { firstName, lastName } = user;
+
+    await user.save();
+
+    let mailOptions = {
+      from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
+      to: `${email}`,
+      subject: 'Reset Password',
+      html: resetPasswordUser(firstName, lastName, resetCode),
+    };
+
+    nodeMailerTransporter.sendMail(mailOptions, function (err, data) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('message sent');
+      }
+    });
+
+    res.status(200).send({ user });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+
+export const resetPasswordConfirmCode = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        msg: 'Sorry, there is no user registered with this email!',
+      });
+    }
+
+    if (user.resetPasswordCode !== code) {
+      return res.status(400).json({
+        msg: 'Sorry, code does not match!',
+      });
+    }
+
+    res.status(200).send({ user });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { email, newPassword, code } = req.body;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        msg: 'Sorry, there is no user registered with this email!',
+      });
+    }
+
+    if (user.resetPasswordCode !== code) {
+      return res.status(400).json({
+        msg: 'Sorry, code does not match!',
+      });
+    }
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).send({ user });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
 
 export const deleteCurrentUser = async (req, res, next) => {
   const yachtWithThisAdmin = await Yacht.find({ admin: req.user._id });
@@ -150,7 +245,10 @@ export const getUser = async (req, res, next) => {
     const specificUser = await User.findById(
       req.params.id,
       'firstName lastName email isAdmin position entries settings profileImage'
-    );
+    ).populate('entries');
+
+    console.log('specificUser');
+    console.log(specificUser);
 
     res.json(specificUser);
   } catch (error) {
@@ -200,18 +298,44 @@ export const verifyUser = async (req, res, next) => {
   }
 };
 
-export const updateUser = async (req, res, next) => {
-  console.log('UPDATE USER CONTROLLER CALLED')
+export const updateOtherUser = async (req, res, next) => {
+  const updates = Object.keys(req.body).filter(
+    (item) => item !== 'token' && item !== 'userId'
+  );
+
+  const userToUpdate = await User.findById(req.body.userId).populate('entries');
+
+  try {
+    const allowedUpdates = ['position'];
+
+    const updateAllowed = updates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!updateAllowed) {
+      console.log('invalid updates');
+      return res.status(400).send({ error: 'Invalid updates!' });
+    }
+
+    updates.forEach((update) => (userToUpdate[update] = req.body[update]));
+
+    await userToUpdate.save();
+
+    res.status(200).send(userToUpdate);
+  } catch (error) {
+    console.log('error from catch backend');
+    console.log(error);
+    res.status(400).send(error);
+  }
+};
+
+export const updateCurrentUser = async (req, res, next) => {
   const currentUserYacht = await Yacht.findById(req.user.yacht);
   const { yachtUniqueName } = currentUserYacht;
- 
 
   const updates = Object.keys(req.body).filter(
     (item) => item !== 'token' && item !== 'yachtUniqueName'
   );
-
-  console.log('updates!')
-  console.log(updates)
 
   try {
     if (req.file) {
@@ -221,14 +345,16 @@ export const updateUser = async (req, res, next) => {
         (result) => result
       );
 
-     
-
-       req.user['profileImage'] = await profileImage;
+      req.user['profileImage'] = await profileImage;
     }
 
- 
-
-    const allowedUpdates = ['position', 'profileImage', 'isPrivateProfile', 'firstName', 'lastName'];
+    const allowedUpdates = [
+      'position',
+      'profileImage',
+      'isPrivateProfile',
+      'firstName',
+      'lastName',
+    ];
 
     const updateAllowed = updates.every((update) =>
       allowedUpdates.includes(update)
@@ -253,17 +379,12 @@ export const updateUser = async (req, res, next) => {
 
     // const userToUpdate = await User.find(
     //   { _id: req.user.id }
-    
+
     // );
 
     // const userToUpdate = await User.findById(req.user.id);
 
-
-
     updates.forEach((update) => (req.user[update] = req.body[update]));
-
-    console.log('req.user')
-    console.log(req.user)
 
     await req.user.save();
 
@@ -276,10 +397,8 @@ export const updateUser = async (req, res, next) => {
 };
 
 export const updateAdmin = async (req, res, next) => {
-  console.log('UPDATE ADMIN CONTROLLER CALLED')
+  console.log('UPDATE ADMIN CONTROLLER CALLED');
   const updates = Object.keys(req.body).filter((item) => item !== 'token');
-
-
 
   let profileImage;
   try {
@@ -415,7 +534,6 @@ export const joinYacht = async (req, res, next) => {
       { $push: { users: req.user._id } }
     );
     // const currentYacht = await Yacht.find({ yachtUniqueName: yachtUniqueName });
- 
 
     // const query = await Yacht.find({ 'invitedUsers.email': user.email });
 
