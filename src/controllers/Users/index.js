@@ -306,7 +306,7 @@ export const updateOtherUser = async (req, res, next) => {
   const userToUpdate = await User.findById(req.body.userId).populate('entries');
 
   try {
-    const allowedUpdates = ['position'];
+    const allowedUpdates = ['position', 'firstName', 'lastName'];
 
     const updateAllowed = updates.every((update) =>
       allowedUpdates.includes(update)
@@ -333,9 +333,15 @@ export const updateCurrentUser = async (req, res, next) => {
   const currentUserYacht = await Yacht.findById(req.user.yacht);
   const { yachtUniqueName } = currentUserYacht;
 
+  console.log('req.body')
+  console.log(req.body)
+
   const updates = Object.keys(req.body).filter(
-    (item) => item !== 'token' && item !== 'yachtUniqueName'
+    (item) => item !== 'token' && item !== 'yachtUniqueName' && item !== 'userId'
   );
+
+  console.log('updates')
+  console.log(updates)
 
   try {
     if (req.file) {
