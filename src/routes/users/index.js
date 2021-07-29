@@ -48,6 +48,7 @@ const router = Router();
 router.get('/user/:id', getUser);
 router.get('/current', auth, getCurrentUser);
 router.delete('/current', auth, deleteCurrentUser);
+router.delete('/:id', deleteUser);
 router.post('/register/user', userValidationRules(), validate, registerUser); //just use this from admin?
 router.get('/verify/:token', verifyUser);
 router.get('/isUserInvited', auth, isUserInvited);
@@ -63,7 +64,7 @@ router.post('/password-reset-send-code', resetPasswordSendCode);
 router.post('/password-reset-confirm-code', resetPasswordConfirmCode);
 router.post('/password-reset', resetPassword);
 
-// router.delete('/:id', deleteUser);
+
 
 // router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
 

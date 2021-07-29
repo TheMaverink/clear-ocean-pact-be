@@ -9,6 +9,8 @@ import User from '@models/User';
 import Yacht from '@models/Yacht';
 import confirmationRedirect from '@resources/pages/confirmationRedirect';
 
+import mongoose from 'mongoose';
+
 // import nodeMailerTransporter from '@utils/nodeMailerTransporter';
 import confirmUser from '@resources/emails/confirmUser';
 import inviteUser from '@resources/emails/inviteUser';
@@ -149,6 +151,19 @@ export const deleteCurrentUser = async (req, res, next) => {
   await Yacht.findByIdAndRemove(yachtWithThisAdmin[0].id);
 
   res.status(200).send({ msg: 'users deleted' });
+};
+
+export const deleteUser = async (req, res, next) => {
+  try {
+    // const user = await User.findById(req.params.id);
+
+    await User.findByIdAndRemove(req.params.id);
+
+    res.json({ msg: 'User deleted' });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send('Server Error');
+  }
 };
 
 export const registerUser = async (req, res, next) => {
@@ -333,15 +348,16 @@ export const updateCurrentUser = async (req, res, next) => {
   const currentUserYacht = await Yacht.findById(req.user.yacht);
   const { yachtUniqueName } = currentUserYacht;
 
-  console.log('req.body')
-  console.log(req.body)
+  console.log('req.body');
+  console.log(req.body);
 
   const updates = Object.keys(req.body).filter(
-    (item) => item !== 'token' && item !== 'yachtUniqueName' && item !== 'userId'
+    (item) =>
+      item !== 'token' && item !== 'yachtUniqueName' && item !== 'userId'
   );
 
-  console.log('updates')
-  console.log(updates)
+  console.log('updates');
+  console.log(updates);
 
   try {
     if (req.file) {
@@ -485,17 +501,6 @@ export const getAllUsers = async (req, res, next) => {
     ).populate('entries');
 
     res.json(allUsers);
-  } catch (error) {
-    res.status(500).send('Server Error');
-    console.log(error.message);
-  }
-};
-
-export const deleteUser = async (req, res, next) => {
-  try {
-    await User.findOneAndRemove({ _id: req.params.id });
-
-    res.json({ msg: 'User deleted' });
   } catch (error) {
     res.status(500).send('Server Error');
     console.log(error.message);
