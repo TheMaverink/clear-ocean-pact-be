@@ -353,7 +353,7 @@ const confirmUser = (name, confirmLink)=>{
                       <tr>
                         <td>
                           <p>Hi ${name},</p>
-                          <p>Thanks for being part of the Clear Ocean Project - a citizen science project for the yachting industry in partnership with MYBA, the Clear Ocean Pact and Just One Ocean.</p>
+                          <p>Thanks for being part of the Clear Ocean Pact - a citizen science project for the yachting industry in partnership with MYBA, the Clear Ocean Pact and Just One Ocean.</p>
                           <p>Please click below to confirm your account.</p>
                      
                           <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
@@ -371,7 +371,7 @@ const confirmUser = (name, confirmLink)=>{
                               </tr>
                             </tbody>
                           </table>
-                          <p>Once confirmed, you will have full access to all Clear Ocean Project app features.</p>
+                          <p>Once confirmed, you will have full access to all Clear Ocean Pact app features.</p>
                           <p>Please do not reply to this email.</p>
                          
                         </td>

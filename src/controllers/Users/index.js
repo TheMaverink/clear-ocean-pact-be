@@ -59,7 +59,7 @@ export const resetPasswordSendCode = async (req, res, next) => {
     await user.save();
 
     let mailOptions = {
-      from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
+      from: 'Clear Ocean Pact <noreply@test.com>',
       to: `${email}`,
       subject: 'Reset Password',
       html: resetPasswordUser(firstName, lastName, resetCode),
@@ -192,7 +192,7 @@ export const registerUser = async (req, res, next) => {
     const confirmLink = `${process.env.PROD_BASE_URL}/api/users/verify/${token}`;
 
     let mailOptions = {
-      from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
+      from: 'Clear Ocean Pact <noreply@test.com>',
       to: `${email}`,
       subject: 'Email Verification',
       html: confirmUser(firstName, confirmLink),
@@ -234,7 +234,7 @@ export const inviteUsers = async (req, res, next) => {
     await currentYacht.save();
 
     let mailOptions = {
-      from: 'Clear Ocean Project <noreply@clearoceanproject.com>',
+      from: 'Clear Ocean Pact <noreply@test.com>',
       to: `${invitedEmail}`,
       subject: 'You have been invited!',
       html: inviteUser(invitedFirstName, adminName, yachtUniqueName, yachtName),

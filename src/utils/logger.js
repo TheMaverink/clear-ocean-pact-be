@@ -13,14 +13,14 @@ const logger = createLogger({
     format.splat(),
     format.json(),
   ),
-  defaultMeta: { service: 'clear-ocean-pack' },
+  defaultMeta: { service: 'clear-ocean-pact' },
   transports: [
     //
     // - Write to all logs with level `info` and below to `ifancydata-combined.log`.
     // - Write all logs error (and below) to `ifancydata-error.log`.
     //
-    new transports.File({ filename: 'clear-ocean-pack.log', level: 'error' }),
-    new transports.File({ filename: 'clear-ocean-pack.log' }),
+    new transports.File({ filename: 'clear-ocean-pact.log', level: 'error' }),
+    new transports.File({ filename: 'clear-ocean-pact.log' }),
   ],
 })
 
