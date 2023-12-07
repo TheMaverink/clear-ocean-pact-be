@@ -9,22 +9,24 @@
 //DELETE users/$userId
 //POST users/invite -> email, name
 
-import { Router } from 'express';
+import { Router } from "express";
 
-import auth from '@middlewares/auth';
-import { userValidationRules, validate } from '@utils/validator';
+import auth from "@middlewares/auth";
+import { userValidationRules, validate } from "@utils/validator";
 
-var multer = require('multer');
+import usersControllers from "@controllers/Users";
+
+var multer = require("multer");
 var upload = multer({
   // limits: { fileSize: 1024 * 1024 },
 });
-var type = upload.single('profileImage');
-var userType = upload.single('profileImage');
+var type = upload.single("profileImage");
+var userType = upload.single("profileImage");
 
-import {
+const {
+  getUser,
   registerUser,
   verifyUser,
-  getUser,
   updateCurrentUser,
   updateOtherUser,
   updateAdmin,
@@ -39,32 +41,30 @@ import {
   resetPassword,
   resetPasswordSendCode,
   resetPasswordConfirmCode,
-} from '@controllers/Users';
+} = usersControllers;
 
 const router = Router();
 
 //add new route to add users to permitted emails
 //ADD AUTH ROUTES
-router.get('/user/:id', getUser);
-router.get('/current', auth, getCurrentUser);
-router.delete('/current', auth, deleteCurrentUser);
-router.delete('/:id', deleteUser);
-router.post('/register/user', userValidationRules(), validate, registerUser); //just use this from admin?
-router.get('/verify/:token', verifyUser);
-router.get('/isUserInvited', auth, isUserInvited);
-router.post('/updateUser', auth, userType, updateCurrentUser);
-router.post('/updateOtherUser', auth, userType, updateOtherUser);
-router.post('/joinYacht', auth, userType, joinYacht);
-router.post('/updateAdmin', auth, type, updateAdmin);
-router.post('/login', userValidationRules(), validate, loginUser);
-router.post('/join-yacht', auth, joinYacht);
-router.get('/all', getAllUsers);
-router.post('/invite', auth, inviteUsers);
-router.post('/password-reset-send-code', resetPasswordSendCode);
-router.post('/password-reset-confirm-code', resetPasswordConfirmCode);
-router.post('/password-reset', resetPassword);
-
-
+router.get("/user/:id", getUser);
+router.get("/current", auth, getCurrentUser);
+router.delete("/current", auth, deleteCurrentUser);
+router.delete("/:id", deleteUser);
+router.post("/register/user", userValidationRules(), validate, registerUser); //just use this from admin?
+router.get("/verify/:token", verifyUser);
+router.get("/isUserInvited", auth, isUserInvited);
+router.post("/updateUser", auth, userType, updateCurrentUser);
+router.post("/updateOtherUser", auth, userType, updateOtherUser);
+router.post("/joinYacht", auth, userType, joinYacht);
+router.post("/updateAdmin", auth, type, updateAdmin);
+router.post("/login", userValidationRules(), validate, loginUser);
+router.post("/join-yacht", auth, joinYacht);
+router.get("/all", getAllUsers);
+router.post("/invite", auth, inviteUsers);
+router.post("/password-reset-send-code", resetPasswordSendCode);
+router.post("/password-reset-confirm-code", resetPasswordConfirmCode);
+router.post("/password-reset", resetPassword);
 
 // router.post('/register/admin', userValidationRules(), validate, registerUserAdmin)
 
