@@ -46,12 +46,7 @@ switch (nodeEnv) {
 }
 
 const connectDb = () => {
-  return mongoose.connect(mongoUri, {
-    // useNewUrlParser: true,
-    // useUnifiedTopology: true,
-    // useFindAndModify:false,
-    // useCreateIndex:true
-  });
+  return mongoose.connect(mongoUri, {});
 };
 
 // EXPRESS CONFIG
