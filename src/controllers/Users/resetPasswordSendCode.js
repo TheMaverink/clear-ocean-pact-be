@@ -1,6 +1,7 @@
 import seedrandom from 'seedrandom';
 import User from '@models/User';
 import resetPasswordUser from '@utils/emails/resetPasswordUser';
+import nodeMailerTransporter from "@utils/nodemailerTransporter";
 
 
  const resetPasswordSendCode = async (req, res, next) => {

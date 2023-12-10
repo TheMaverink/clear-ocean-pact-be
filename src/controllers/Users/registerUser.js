@@ -1,6 +1,6 @@
 import User from "@models/User";
 import confirmUser from "@utils/emails/confirmUser";
-import nodeMailerTransporter from "@utils/nodeMailerTransporter";
+import nodeMailerTransporter from "@utils/nodemailerTransporter";
 
 const registerUser = async (req, res, next) => {
   const { firstName, lastName, email, password } = req.body;

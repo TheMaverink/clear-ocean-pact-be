@@ -1,7 +1,7 @@
 import Yacht from "@models/Yacht";
 
 import inviteUser from "@utils/emails/inviteUser";
-
+import nodeMailerTransporter from "@utils/nodemailerTransporter";
 
 const inviteUsers = async (req, res, next) => {
   try {
