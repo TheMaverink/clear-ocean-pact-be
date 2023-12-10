@@ -12,7 +12,6 @@ import mongoose from "mongoose";
 import cors from "cors";
 import logger from "./utils/logger";
 import errorHandler from "errorhandler";
-const { check, validationResult } = require("express-validator");
 import Routes from "./routes";
 
 dotenv.config({ path: ".env" });

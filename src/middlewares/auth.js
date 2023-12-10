@@ -6,7 +6,6 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
 const auth = async (req, res, next) => {
-  console.log('MIDDLEWARE AUTH CALLED!!!')
   try {
     const token = req.header('Authorization').replace('Bearer ', '');
 
