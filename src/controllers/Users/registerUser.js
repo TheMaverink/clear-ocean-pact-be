@@ -25,7 +25,7 @@ const registerUser = async (req, res, next) => {
 
     const token = await user.generateJwtToken();
     //CHANGE THIS!!!
-    const confirmLink = `${process.env.DEV_BASE_URL}/api/users/verify/${token}`;
+    const confirmLink = `${process.env.PROD_BASE_URL}/api/users/verify/${token}`;
 
     console.log("confirmLink");
     console.log(confirmLink);
@@ -37,7 +37,7 @@ const registerUser = async (req, res, next) => {
       html: confirmUser(firstName, confirmLink),
     };
 
-    nodeMailerTransporter.sendMail(mailOptions, function (err, data) {
+    await nodeMailerTransporter.sendMail(mailOptions, function (err, data) {
       if (err) {
         console.log(err);
       } else {

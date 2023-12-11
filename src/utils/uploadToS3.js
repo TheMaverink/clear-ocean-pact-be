@@ -4,18 +4,18 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
 const s3 = new S3({
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY,
-  region: process.env.BUCKET_REGION,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_BUCKET_REGION,
   // signatureVersion: 'v4',
 });
 
 const uploadToS3 = (buffer, filePath) => { //try multipart
   const bucketUrl =
     'https://' +
-    process.env.BUCKET_NAME +
+    process.env.AWS_BUCKET_NAME +
     '.s3.' +
-    process.env.BUCKET_REGION +
+    process.env.AWS_BUCKET_REGION +
     '.amazonaws.com/';
 
   return new Promise((resolve, reject) => {
@@ -27,7 +27,7 @@ const uploadToS3 = (buffer, filePath) => { //try multipart
       {
         Body: buffer,
         // Key: timestamp,
-        Bucket: process.env.BUCKET_NAME,
+        Bucket: process.env.AWS_BUCKET_NAME,
         Key: bucketPath,
         ContentType: 'image/jpeg',
       },

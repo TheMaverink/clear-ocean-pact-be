@@ -19,8 +19,8 @@ pipelines:
           script:
             - pipe: atlassian/aws-elasticbeanstalk-deploy:0.5.0
               variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
                 APPLICATION_NAME: $APPLICATION_NAME
                 ENVIRONMENT_NAME: $ENVIRONMENT_NAME
@@ -45,8 +45,8 @@ pipelines:
     #       script:
     #         - pipe: atlassian/aws-elasticbeanstalk-deploy:0.5.0
     #           variables:
-    #             AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-    #             AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    #             AWS_AWS_ACCESS_KEY_ID: $AWS_AWS_ACCESS_KEY_ID
+    #             AWS_AWS_SECRET_ACCESS_KEY: $AWS_AWS_SECRET_ACCESS_KEY
     #             AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
     #             APPLICATION_NAME: $APPLICATION_NAME
     #             ENVIRONMENT_NAME: $ENVIRONMENT_NAME

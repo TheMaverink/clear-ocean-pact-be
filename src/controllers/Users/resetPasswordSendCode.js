@@ -30,7 +30,7 @@ import nodeMailerTransporter from "@utils/nodemailerTransporter";
         html: resetPasswordUser(firstName, lastName, resetCode),
       };
   
-      nodeMailerTransporter.sendMail(mailOptions, function (err, data) {
+      await nodeMailerTransporter.sendMail(mailOptions, function (err, data) {
         if (err) {
           console.log(err);
         } else {
