@@ -1,5 +1,9 @@
-import uploadToS3 from "@utils/uploadToS3";
 import Yacht from "@models/Yacht";
+
+import { uploadFileToS3, BUCKET_FOLDERS } from "@utils/s3";
+import generateFileName from "@utils/generateFileName";
+
+const { USER_IMAGES_FOLDER } = BUCKET_FOLDERS;
 
 const updateCurrentUser = async (req, res, next) => {
   const currentUserYacht = await Yacht.findById(req.user.yacht);
@@ -18,13 +22,18 @@ const updateCurrentUser = async (req, res, next) => {
 
   try {
     if (req.file) {
-      let profileImage = null;
+      const currentFileName = generateFileName();
+      const currentFileKey = `${USER_IMAGES_FOLDER}/${currentFileName}`;
 
-      profileImage = await uploadToS3(req.file.buffer, "user-images/").then(
-        (result) => result
-      );
+      const uploadPromise = uploadFileToS3(
+        req.file.buffer,
+        currentFileKey
+      ).then((result) => result);
 
-      req.user["profileImage"] = await profileImage;
+      console.log("uploadPromise");
+      console.log(uploadPromise);
+
+      req.user["profileImage"] = currentFileKey;
     }
 
     const allowedUpdates = [

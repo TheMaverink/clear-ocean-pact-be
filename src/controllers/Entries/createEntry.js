@@ -2,27 +2,36 @@ import Yacht from "@models/Yacht";
 import User from "@models/User";
 import Entry from "@models/Entry";
 
-import uploadToS3 from "@utils/uploadToS3";
+import generateFileName from "@utils/generateFileName";
+
+import { uploadFileToS3, BUCKET_FOLDERS } from "@utils/s3";
+
+const { ENTRY_IMAGES_FOLDER } = BUCKET_FOLDERS;
 
 const createEntry = async (req, res, next) => {
   const { latitude, longitude } = req.body;
   const types = JSON.parse(req.body.types);
 
   try {
-    const promises = [];
+    const fileUploadPromises = [];
+    const imageSavedSignedUrls = [];
 
     req.files.forEach((file) => {
-      promises.push(
-        uploadToS3(file.buffer, "entry-images/").then((result) => result)
+      const currentFileName = generateFileName();
+      const currentFileKey = `${ENTRY_IMAGES_FOLDER}/${currentFileName}`;
+
+      const uploadPromise = uploadFileToS3(file.buffer, currentFileKey).then(
+        (result) => result
       );
+
+      fileUploadPromises.push(uploadPromise);
     });
 
-    const imageSavedUrls = await Promise.all(promises).then((results) => {
-      console.log("images uploaded");
-      return results.map((file) => {
-        return file;
-      });
-    });
+    const uploadResults = await Promise.all(fileUploadPromises);
+
+    for (const result of uploadResults) {
+      imageSavedSignedUrls.push(result.key);
+    }
 
     const location = {
       type: "Point",
@@ -32,12 +41,10 @@ const createEntry = async (req, res, next) => {
     const newEntry = new Entry({
       location,
       types,
-      imageUrls: imageSavedUrls || null,
+      imageUrls: imageSavedSignedUrls || null,
       author: req.user.id,
       yacht: req.user.yacht,
     });
-
-    console.log(req.user);
 
     await newEntry.save();
 

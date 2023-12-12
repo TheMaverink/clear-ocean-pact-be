@@ -1,17 +1,26 @@
-import uploadToS3 from "@utils/uploadToS3";
+import generateFileName from "@utils/generateFileName";
+
+import { uploadFileToS3, BUCKET_FOLDERS } from "@utils/s3";
+
+const { USER_IMAGES_FOLDER } = BUCKET_FOLDERS;
 
 const updateAdmin = async (req, res, next) => {
-  console.log("UPDATE ADMIN CONTROLLER CALLED");
   const updates = Object.keys(req.body).filter((item) => item !== "token");
 
-  let profileImage;
   try {
     if (req.file) {
-      profileImage = await uploadToS3(req.file.buffer, "user-images/").then(
-        (result) => result
-      );
+      const currentFileName = generateFileName();
+      const currentFileKey = `${USER_IMAGES_FOLDER}/${currentFileName}`;
 
-      req.user["profileImage"] = profileImage;
+      const uploadPromise = uploadFileToS3(
+        req.file.buffer,
+        currentFileKey
+      ).then((result) => result);
+
+      console.log("uploadPromise");
+      console.log(uploadPromise);
+
+      req.user["profileImage"] = currentFileKey;
     }
 
     //---

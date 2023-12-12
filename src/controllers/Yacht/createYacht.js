@@ -1,7 +1,10 @@
 import Yacht from "@models/Yacht";
-
 import User from "@models/User";
-import uploadToS3 from "@utils/uploadToS3";
+
+import { uploadFileToS3, BUCKET_FOLDERS } from "@utils/s3";
+import generateFileName from "@utils/generateFileName";
+
+const { YACHT_IMAGES_FOLDER } = BUCKET_FOLDERS;
 
 const createYacht = async (req, res, next) => {
   const { yachtName, flag, officialNumber, token } = req.body;
@@ -10,9 +13,6 @@ const createYacht = async (req, res, next) => {
   const { user } = req;
   const yachtUniqueName =
     yachtName.replace(/\s/g, "") + flag.replace(/\s/g, "").toLowerCase();
-
-  console.log("yachtUniqueName");
-  console.log(yachtUniqueName);
 
   try {
     let yacht = await Yacht.findOne({ yachtUniqueName });
@@ -38,11 +38,18 @@ const createYacht = async (req, res, next) => {
     }
 
     if (req.file) {
-      console.log("is gona upload yacht img");
+      const currentFileName = generateFileName();
+      const currentFileKey = `${YACHT_IMAGES_FOLDER}/${currentFileName}`;
 
-      yachtImageUrl = await uploadToS3(req.file.buffer, "yacht-images/").then(
-        (result) => result
-      );
+      const uploadPromise = uploadFileToS3(
+        req.file.buffer,
+        currentFileKey
+      ).then((result) => result);
+
+      console.log("uploadPromise");
+      console.log(uploadPromise);
+
+      yachtImageUrl = currentFileKey;
     }
 
     yacht = new Yacht({

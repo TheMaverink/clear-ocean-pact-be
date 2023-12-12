@@ -1,16 +1,21 @@
-import { Router } from 'express'
+import { Router } from "express";
 
-import yacht from './yacht'
-import users from './users'
-import entries from './entries'
+import dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
-const router = Router()
+import yacht from "./yacht";
+import users from "./users";
+import entries from "./entries";
+import test from "./test";
 
-router.use('/yacht', yacht)
-router.use('/users', users)
-router.use('/entries', entries)
+const router = Router();
 
-export default router
+router.use("/yacht", yacht);
+router.use("/users", users);
+router.use("/entries", entries);
 
+if (process.env.ENABLE_TEST_ROUTES == "true") {
+  router.use("/test", test);
+}
 
-
+export default router;
