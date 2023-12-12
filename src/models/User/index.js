@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import {getObjectSignedUrl} from "utils/s3"
 
 dotenv.config({ path: '.env' });
 
@@ -77,6 +78,15 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.virtual('profileImageSignedUrl').get(async function () {
+  const signedUrl = await getObjectSignedUrl(this.profileImage);
+  return signedUrl;
+});
+
+userSchema.virtual('doesHaveProfileImage').get(function () {
+  return !!this.profileImage
+});
 
 userSchema.virtual('entriesCount').get(function () {
   return this.entries.length;

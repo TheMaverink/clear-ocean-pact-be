@@ -1,28 +1,28 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema } from "mongoose";
+import { getObjectSignedUrl } from "utils/s3";
 
 const entrySchema = new mongoose.Schema(
   {
     location: {
       type: {
         type: String,
-        enum: ['Point'],
+        enum: ["Point"],
       },
       coordinates: {
         type: [Number],
-        index: '2dsphere',
+        index: "2dsphere",
       },
     },
     author: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     yacht: {
       type: Schema.Types.ObjectId,
-      ref: 'Yacht',
+      ref: "Yacht",
       required: true,
     },
-
     imageUrls: {
       type: [String],
     },
@@ -56,6 +56,18 @@ const entrySchema = new mongoose.Schema(
 //   next();
 // });
 
-const Entry = mongoose.model('Entry', entrySchema);
+entrySchema.virtual("entryImagesSignedUrls").get(async function () {
+  if (this.imageUrls > 0) {
+    let signedUrls = [];
+
+    for (const result of this.imageUrls) {
+      const signedUrl = await getObjectSignedUrl(result.key);
+      signedUrls.push(signedUrl);
+    }
+    return signedUrls;
+  }
+});
+
+const Entry = mongoose.model("Entry", entrySchema);
 
 export default Entry;

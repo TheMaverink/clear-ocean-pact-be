@@ -1,5 +1,7 @@
  import mongoose, { Schema } from 'mongoose';
 import dotenv from 'dotenv';
+import {getObjectSignedUrl} from "utils/s3"
+
 
 dotenv.config({ path: '.env' });
 
@@ -69,6 +71,11 @@ const yachtSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.virtual('yachtImageSignedUrl').get(async function () {
+  const signedUrl = await getObjectSignedUrl(this.yachtImage);
+  return signedUrl;
+});
 
 // yachtSchema.pre('save', async function (next) {
 //   if (this.isModified('name') || this.isModified('flag')) {
