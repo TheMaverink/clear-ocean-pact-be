@@ -7,10 +7,14 @@ const getUser = async (req, res, next) => {
       "firstName lastName email isAdmin position entries settings profileImage"
     ).populate("entries");
 
-    console.log("specificUser");
-    console.log(specificUser);
+    const profileImageSignedUrl = await currentUser.profileImageSignedUrl;
 
-    res.json(specificUser);
+    const response = {
+      ...specificUser.toObject({ getters: true, virtuals: true }),
+      profileImageSignedUrl,
+    };
+
+    res.json(response);
   } catch (error) {
     res.status(500).send("Server Error");
     console.log(error.message);

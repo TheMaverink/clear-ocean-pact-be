@@ -6,11 +6,14 @@ const getCurrentUser = async (req, res, next) => {
       .select("-tokens -password")
       .populate("yacht");
 
-    // const currentUser = await User.findById(req.user.id).populate('yacht');
+    const profileImageSignedUrl = await currentUser.profileImageSignedUrl;
 
-    // const currentUser = await User.findById(req.user.id)
+    const response = {
+      ...currentUser.toObject({ getters: true, virtuals: true }),
+      profileImageSignedUrl,
+    };
 
-    res.json(currentUser);
+    res.json(response);
   } catch (error) {
     res.status(500).send("Server Error");
     console.log(error.message);

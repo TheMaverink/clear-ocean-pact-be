@@ -1,4 +1,6 @@
  import mongoose, { Schema } from 'mongoose';
+ import mongooseLeanGetters from "mongoose-lean-getters"
+
 import dotenv from 'dotenv';
 import {getObjectSignedUrl} from "utils/s3"
 
@@ -51,7 +53,6 @@ const yachtSchema = new mongoose.Schema(
     },
     yachtUniqueName: {
       type: String,
-
       required: true,
     },
     yachtImage: {
@@ -72,7 +73,7 @@ const yachtSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.virtual('yachtImageSignedUrl').get(async function () {
+yachtSchema.virtual('yachtImageSignedUrl').get(async function () {
   const signedUrl = await getObjectSignedUrl(this.yachtImage);
   return signedUrl;
 });
@@ -86,6 +87,10 @@ userSchema.virtual('yachtImageSignedUrl').get(async function () {
 
 //   next();
 // });
+
+yachtSchema.set('toJSON', { getters: true, virtuals: false });
+
+yachtSchema.plugin(mongooseLeanGetters);
 
 const Yacht = mongoose.model('Yacht', yachtSchema);
 

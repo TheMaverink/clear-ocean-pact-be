@@ -1,5 +1,6 @@
 import User from '@models/User';
 
+//Ensure signed images are not needed here
  const getAllUsers = async (req, res, next) => {
     try {
       const allUsers = await User.find(

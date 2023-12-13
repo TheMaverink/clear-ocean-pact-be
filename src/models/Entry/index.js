@@ -1,4 +1,6 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseLeanGetters from "mongoose-lean-getters"
+
 import { getObjectSignedUrl } from "utils/s3";
 
 const entrySchema = new mongoose.Schema(
@@ -67,6 +69,10 @@ entrySchema.virtual("entryImagesSignedUrls").get(async function () {
     return signedUrls;
   }
 });
+
+entrySchema.set('toJSON', { getters: true, virtuals: false });
+
+entrySchema.plugin(mongooseLeanGetters);
 
 const Entry = mongoose.model("Entry", entrySchema);
 

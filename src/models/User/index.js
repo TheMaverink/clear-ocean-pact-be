@@ -1,10 +1,11 @@
-import mongoose, { Schema } from 'mongoose';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
-import {getObjectSignedUrl} from "utils/s3"
+import mongoose, { Schema } from "mongoose";
+import mongooseLeanGetters from "mongoose-lean-getters"
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import bcrypt from "bcrypt";
+import { getObjectSignedUrl } from "utils/s3";
 
-dotenv.config({ path: '.env' });
+dotenv.config({ path: ".env" });
 
 const userSchema = new mongoose.Schema(
   {
@@ -37,7 +38,7 @@ const userSchema = new mongoose.Schema(
     },
     yacht: {
       type: Schema.Types.ObjectId,
-      ref: 'Yacht',
+      ref: "Yacht",
     },
     tokens: [
       {
@@ -50,6 +51,7 @@ const userSchema = new mongoose.Schema(
     profileImage: {
       type: String,
       required: false,
+      // get: generateObjectSignedUrl
     },
     position: {
       type: String,
@@ -57,38 +59,48 @@ const userSchema = new mongoose.Schema(
     entries: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Entry',
+        ref: "Entry",
       },
     ],
     isPrivateProfile: {
       type: Boolean,
       default: false,
     },
-    resetPasswordCode:{
-      type:String,
+    resetPasswordCode: {
+      type: String,
       trim: true,
-    }
+    },
     // settings: {
     //   private: {
     //     type: Boolean,
     //     default: false,
     //   },
     // },
-   
   },
   { timestamps: true }
 );
 
-userSchema.virtual('profileImageSignedUrl').get(async function () {
+// async function generateObjectSignedUrl(key) {
+//   if (!key) {
+//     return { key };
+//   } else {
+//     console.log("HAS KEY")
+//     const signedUrl = await getObjectSignedUrl(this.profileImage);
+
+//     return { key, signedUrl };
+//   }
+// }
+
+userSchema.virtual("profileImageSignedUrl").get(async function () {
   const signedUrl = await getObjectSignedUrl(this.profileImage);
   return signedUrl;
 });
 
-userSchema.virtual('doesHaveProfileImage').get(function () {
-  return !!this.profileImage
+userSchema.virtual("doesHaveProfileImage").get(function () {
+  return !!this.profileImage;
 });
 
-userSchema.virtual('entriesCount').get(function () {
+userSchema.virtual("entriesCount").get(function () {
   return this.entries.length;
 });
 
@@ -110,8 +122,8 @@ userSchema.methods.getPublicProfile = function () {
   return userObj;
 };
 
-userSchema.pre('save', async function (next) {
-  if (this.isModified('password')) {
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
   }
@@ -119,6 +131,10 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-const User = mongoose.model('User', userSchema);
+// userSchema.set('toJSON', { getters: true, virtuals: false });
+
+userSchema.plugin(mongooseLeanGetters);
+
+const User = mongoose.model("User", userSchema);
 
 export default User;
