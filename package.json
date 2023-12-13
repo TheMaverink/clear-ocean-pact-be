@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build": "npm run prebuild && babel src -d dist",
-    "start": "npm run build && npm run server",
+    "build": "rm -rf dist && babel src -d dist",
+    "prepare":"rm -rf buildartifact.zip && zip -r buildartifact.zip dist package.json && zip -r buildartifact.zip dist",
+    "start": "npm run server",
     "server": "cross-env NODE_ENV=production node dist/app.js",
     "dev": "cross-env NODE_ENV=development nodemon --exec babel-node src/app.js",
-    "debug": "cross-env NODE_ENV=development nodemon --ignore 'data' --inspect --exec babel-node app.js"
+    "debug": "cross-env NODE_ENV=development nodemon --ignore 'data' --inspect --exec babel-node app.js",
+    "deploy":"npm run build && npm run prepare && eb deploy"
   },
   "repository": {
     "type": "git",

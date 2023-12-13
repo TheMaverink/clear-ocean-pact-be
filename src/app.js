@@ -34,7 +34,7 @@ switch (nodeEnv) {
     break;
 
   case "production":
-    mongoUri = process.env.DEV_MONGODB_URI;
+    mongoUri = process.env.PROD_MONGODB_URI;
     console.log(chalk.red(chalk.white.bgMagenta.bold("Production Mode")));
     break;
 }
